@@ -8,7 +8,7 @@ function AppProvider({ children }) {
   const [authProvider, setAuthProvider] = useState(null);
   const [sessionCart, setSessionCart] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [activeCat, setActiveCat] = useState(1);
+  const [activeCart, setActiveCart] = useState(null);
   const [loginForCheckout, setLoginForCheckout] = useState(false);
   const [toasts, setToasts] = useState([]);
   const [loginOpen, setLoginOpen] = useState(false);
@@ -95,7 +95,7 @@ function AppProvider({ children }) {
     <AppContext.Provider value={{
       user, authProvider, isGuest,
       sessionCart, addToCart, removeFromCart,
-      orders, activeCat, setActiveCat,
+      orders, activeCart, setActiveCart,
       loginForCheckout, toasts,
       loginOpen, openLogin, closeLogin, openLoginForCheckout,
       checkoutOpen, setCheckoutOpen,

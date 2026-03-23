@@ -7,8 +7,8 @@ const ProductCard = ({ product, onDetail }) => {
   const inCart = sessionCart.includes(product.ProductId);
   return (
     <div className="card">
-      <div className="card-img" onClick={() => onDetail(product.ProductId)}>
-        <img src={product.ThumbnailUrl} alt={product.Name} loading="lazy" />
+      <div className="card-img" onClick={() => onDetail(product.id)}>
+        <img src={product.image} alt={product.name} loading="lazy" />
         <span className="card-cat">{getCartName(product.CategoryId)}</span>
       </div>
       <div className="card-body">
