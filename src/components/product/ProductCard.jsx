@@ -1,30 +1,28 @@
-import { useApp } from '../../context/AppContext';
-import { Stars } from '../ui/Stars';
-import { getCartName } from '../../utils/Helper';
+import { useApp } from "../../context/AppContext";
 
 const ProductCard = ({ product, onDetail }) => {
   const { sessionCart, addToCart } = useApp();
-  const inCart = sessionCart.includes(product.ProductId);
+  const inCart = sessionCart.includes(product.id);
+
   return (
     <div className="card">
       <div className="card-img" onClick={() => onDetail(product.id)}>
-        <img src={product.image} alt={product.name} loading="lazy" />
-        <span className="card-cat">{getCartName(product.CategoryId)}</span>
+        <img src={product.thumbnailUrl} alt={product.name} loading="lazy" />
+        <span className="card-cat">{product.categoryName}</span>
       </div>
       <div className="card-body">
-        <div className="card-title" onClick={() => onDetail(product.ProductId)}>
-          {product.Name}
+        <div className="card-title" onClick={() => onDetail(product.id)}>
+          {product.name}
         </div>
-        <div className="card-desc">{product.Description}</div>
-        <div className="card-rating">
-          <Stars rating={product.avgRating} />
-          {product.avgRating} ({product.reviewCount} 則評論)
-        </div>
+        <div className="card-desc">{product.description}</div>
         <div className="card-footer">
-          <span className="card-price">${product.Price}</span>
+          <span className="card-price">${product.price}</span>
           <button
             className={`btn-cart ${inCart ? "added" : ""}`}
-            onClick={e => { e.stopPropagation(); addToCart(product.ProductId); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              addToCart(product.id);
+            }}
           >
             {inCart ? "✓ 已加入" : "加入購物車"}
           </button>
@@ -32,6 +30,6 @@ const ProductCard = ({ product, onDetail }) => {
       </div>
     </div>
   );
-}
+};
 
 export default ProductCard;

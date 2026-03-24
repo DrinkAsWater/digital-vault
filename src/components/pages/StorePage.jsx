@@ -14,47 +14,35 @@ const StorePage = () => {
   useEffect(() => {
     getCategories()
       .then((data) => {
-        setCategories(data);
-
-        if (activeCart === undefined) {
-          setActiveCart(null); // 預設全部
-        }
+        setCategories([{ id: null, name: "全部" }, ...data]);
       })
       .catch((err) => setError(err.message));
   }, []);
 
   // 當分類切換時重新取得商品
   useEffect(() => {
-    if (activeCart === undefined) return;
-
-    setLoading(true);
-
+    if (categories.length === 0) return;
     getProducts(activeCart)
-      .then((data) => setProducts(data))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [activeCart]);
+      .then((data) => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [activeCart, categories]);
 
-  if (loading)
-    return (
-      <div style={{ padding: "60px", color: "var(--muted)" }}>載入中...</div>
-    );
-  if (error)
-    return (
-      <div style={{ padding: "60px", color: "var(--danger)" }}>
-        錯誤：{error}
-      </div>
-    );
+  if (loading) return <div style={{ padding: "60px", color: "var(--muted)" }}>載入中...</div>;
+  if (error) return <div style={{ padding: "60px", color: "var(--danger)" }}>錯誤：{error}</div>;
 
   return (
     <>
-      <div className="page-title">
-        商店 <span>全部商品</span>
-      </div>
+      <div className="page-title">商店 <span>全部商品</span></div>
       <div className="cat-nav">
         {categories.map((c) => (
           <button
-            key={c.id}
+            key={c.id ?? "all"}
             className={`cat-btn ${c.id === activeCart ? "active" : ""}`}
             onClick={() => setActiveCart(c.id)}
           >

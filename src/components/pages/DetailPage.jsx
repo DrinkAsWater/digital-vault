@@ -1,40 +1,58 @@
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { Stars } from '../ui/Stars';
-import { products, reviews } from '../../data';
-import { getCartName } from '../../utils/Helper';
-import { useParams } from 'react-router-dom';
-
+import { getProductById } from '../../utils/ApiFuction';
+import { reviews } from '../../data';
 
 const INCLUDES = ["即時數位下載", "永久存取權限", "購買憑證（OrderItems 記錄）", "30 天退款保障"];
 
 const DetailPage = () => {
-  const{id} = useParams();
-  const productId = Number(id);
+  const { id } = useParams();
   const { sessionCart, addToCart, isGuest } = useApp();
-  const p = products.find(x => x.ProductId === productId);
-  if (!p) return null;
-  const inCart = sessionCart.includes(p.ProductId);
-  const pReviews = reviews.filter(r => r.ProductId === productId);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    getProductById(id)
+      .then(data => {
+        setProduct(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [id]);
+
+  if (loading) return <div style={{ padding: '60px', color: 'var(--muted)' }}>載入中...</div>;
+  if (error) return <div style={{ padding: '60px', color: 'var(--danger)' }}>錯誤：{error}</div>;
+  if (!product) return null;
+
+  const inCart = sessionCart.includes(product.id);
+  const pReviews = reviews.filter(r => r.ProductId === product.id);
 
   return (
     <>
       <div className="detail-layout">
-        <div className="detail-img"><img src={p.ThumbnailUrl} alt={p.Name} /></div>
+        <div className="detail-img">
+          <img src={product.thumbnailUrl} alt={product.name} />
+        </div>
         <div className="detail-info">
-          <div className="detail-cat">{getCartName(p.CategoryId)}</div>
-          <div className="detail-title">{p.Name}</div>
-          <div className="detail-rating">
-            <Stars rating={p.avgRating} size="1rem" />
-            <strong>{p.avgRating}</strong><span>({p.reviewCount} 則評論)</span>
-          </div>
-          <p className="detail-desc">{p.Description}</p>
+          <div className="detail-cat">{product.categoryName}</div>
+          <div className="detail-title">{product.name}</div>
+          <p className="detail-desc">{product.description}</p>
           <div className="detail-includes">
             <h4>包含內容</h4>
             {INCLUDES.map(item => <div key={item} className="include-item">{item}</div>)}
           </div>
           <div className="detail-price-row">
-            <span className="detail-price">${p.Price}</span>
-            <button className={`btn-add-cart ${inCart ? "added" : ""}`} onClick={() => addToCart(p.ProductId)}>
+            <span className="detail-price">${product.price}</span>
+            <button
+              className={`btn-add-cart ${inCart ? "added" : ""}`}
+              onClick={() => addToCart(product.id)}
+            >
               {inCart ? "✓ 已加入購物車" : "加入購物車"}
             </button>
           </div>

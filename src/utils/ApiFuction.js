@@ -7,23 +7,13 @@ export const getCategories = async () => {
   return res.data;
 };
 
-// 取得所有商品，可傳入 categoryId 篩選分類（Guid 或 "all"）
-export const getProducts = async (categoryId = "all") => {
-  // 如果 categoryId 是 "all"，就不加 query 參數
-  const url =
-    categoryId && categoryId !== "all"
-      ? `${BASE_URL}/product?categoryId=${categoryId}`
-      : `${BASE_URL}/product`;
-
+// 取得所有商品，可傳入 categoryId 篩選分類（Guid 或 null）
+export const getProducts = async (categoryId = null) => {
+  const url = categoryId
+    ? `${BASE_URL}/product?categoryId=${categoryId}`
+    : `${BASE_URL}/product`;
   const res = await axios.get(url);
-
-  return res.data.map((p, index) => ({
-    id: p.id,
-    name: p.name,
-    price: p.price,
-    image:
-     p.thumbnailUrl || `https://picsum.photos/300/300?random=${p.id || index}`,
-  }));
+  return res.data;
 };
 
 // 取得單一商品詳情，傳入商品 Guid

@@ -1,7 +1,8 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import ProductCard from '../product/ProductCard';
-import { products } from '../../data';
-import { useNavigate } from 'react-router-dom';
+import { getProducts } from '../../utils/ApiFuction';
 
 const STATS = [
   { num: "200+", label: "數位商品" },
@@ -13,6 +14,23 @@ const STATS = [
 const HomePage = () => {
   const navigate = useNavigate();
   const { openLogin } = useApp();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // 頁面載入時取得前4筆商品
+  useEffect(() => {
+    getProducts()
+      .then(data => {
+        setProducts(data.slice(0, 4));
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <>
       <section className="hero">
@@ -27,6 +45,7 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
       <div className="stats">
         {STATS.map(s => (
           <div key={s.label} className="stat">
@@ -35,16 +54,27 @@ const HomePage = () => {
           </div>
         ))}
       </div>
+
       <div className="section">
         <div className="section-header">
           <div className="section-title">熱門商品 <span>精選</span></div>
-          <button className="btn-outline" style={{ padding: "8px 18px", fontSize: "0.82rem" }} onClick={() => navigate("/store")}>
+          <button
+            className="btn-outline"
+            style={{ padding: "8px 18px", fontSize: "0.82rem" }}
+            onClick={() => navigate("/store")}
+          >
             查看全部 →
           </button>
         </div>
         <div className="products" style={{ padding: 0 }}>
-          {products.slice(0, 4).map(p => (
-            <ProductCard key={p.ProductId} product={p} onDetail={id => navigate(`/store/${id}`)} />
+          {loading && <div style={{ color: 'var(--muted)' }}>載入中...</div>}
+          {error && <div style={{ color: 'var(--danger)' }}>錯誤：{error}</div>}
+          {!loading && !error && products.map(p => (
+            <ProductCard
+              key={p.id}
+              product={p}
+              onDetail={id => navigate(`/store/${id}`)}
+            />
           ))}
         </div>
       </div>
