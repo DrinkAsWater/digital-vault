@@ -1,37 +1,27 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useApp } from '../../context/AppContext';
-import { Stars } from '../ui/Stars';
-import { getProductById } from '../../utils/ApiFuction';
-import { reviews } from '../../data';
+import { useParams } from "react-router-dom";
+import { useApp } from "../../context/AppContext";
+import { Stars } from "../ui/Stars";
+import PageStatus from "../ui/PageStatus";
+import { reviews } from "../../data";
+import { useProductDetail } from "../../hook/useProduct";
 
-const INCLUDES = ["即時數位下載", "永久存取權限", "購買憑證（OrderItems 記錄）", "30 天退款保障"];
+const INCLUDES = [
+  "即時數位下載",
+  "永久存取權限",
+  "購買憑證（OrderItems 記錄）",
+  "30 天退款保障",
+];
 
 const DetailPage = () => {
   const { id } = useParams();
   const { sessionCart, addToCart, isGuest } = useApp();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { product, loading, error } = useProductDetail(id);
 
-  useEffect(() => {
-    getProductById(id)
-      .then(data => {
-        setProduct(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, [id]);
-
-  if (loading) return <div style={{ padding: '60px', color: 'var(--muted)' }}>載入中...</div>;
-  if (error) return <div style={{ padding: '60px', color: 'var(--danger)' }}>錯誤：{error}</div>;
+  if (loading || error) return <PageStatus loading={loading} error={error} />;
   if (!product) return null;
 
   const inCart = sessionCart.includes(product.id);
-  const pReviews = reviews.filter(r => r.ProductId === product.id);
+  const pReviews = reviews.filter((r) => r.ProductId === product.id);
 
   return (
     <>
@@ -45,7 +35,11 @@ const DetailPage = () => {
           <p className="detail-desc">{product.description}</p>
           <div className="detail-includes">
             <h4>包含內容</h4>
-            {INCLUDES.map(item => <div key={item} className="include-item">{item}</div>)}
+            {INCLUDES.map((item) => (
+              <div key={item} className="include-item">
+                {item}
+              </div>
+            ))}
           </div>
           <div className="detail-price-row">
             <span className="detail-price">${product.price}</span>
@@ -57,7 +51,9 @@ const DetailPage = () => {
             </button>
           </div>
           <div style={{ fontSize: "0.78rem", color: "var(--muted)" }}>
-            {isGuest() ? "🔒 結帳時需要登入，加入購物車無需帳號" : "付款後狀態：Orders.Status = Paid → Completed"}
+            {isGuest()
+              ? "🔒 結帳時需要登入，加入購物車無需帳號"
+              : "付款後狀態：Orders.Status = Paid → Completed"}
           </div>
         </div>
       </div>
@@ -72,7 +68,7 @@ const DetailPage = () => {
             <p>購買後即可留下評論</p>
           </div>
         ) : (
-          pReviews.map(r => (
+          pReviews.map((r) => (
             <div key={r.ReviewId} className="review-card">
               <div className="review-header">
                 <div className="reviewer-avatar">{r.DisplayName[0]}</div>
@@ -89,6 +85,6 @@ const DetailPage = () => {
       </div>
     </>
   );
-}
+};
 
 export default DetailPage;

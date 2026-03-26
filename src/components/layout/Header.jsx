@@ -25,8 +25,8 @@ const Header = () => {
           </>
         ) : (
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <div className="nav-avatar" onClick={() => navigate("/profile")} title={user.DisplayName}>
-              {user.DisplayName[0].toUpperCase()}
+            <div className="nav-avatar" onClick={() => navigate("/profile")} title={user.displayName}>
+              {user.displayName[0].toUpperCase()}
             </div>
             <button className="nav-cart" style={{ fontSize: "0.78rem" }} onClick={() => navigate("/orders")}>
               我的訂單

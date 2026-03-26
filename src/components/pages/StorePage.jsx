@@ -1,44 +1,20 @@
 import { useApp } from "../../context/AppContext";
+import { useCategories, useProducts } from "../../hook/useProduct";
 import ProductGrid from "../product/ProductGrid";
-import { useEffect, useState } from "react";
-import { getCategories, getProducts } from "../../utils/ApiFuction";
+import PageStatus from "../ui/PageStatus";
 
 const StorePage = () => {
   const { activeCart, setActiveCart } = useApp();
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { categories } = useCategories();
+  const { products, loading, error } = useProducts(activeCart);
 
-  // 頁面載入時取得所有分類
-  useEffect(() => {
-    getCategories()
-      .then((data) => {
-        setCategories([{ id: null, name: "全部" }, ...data]);
-      })
-      .catch((err) => setError(err.message));
-  }, []);
-
-  // 當分類切換時重新取得商品
-  useEffect(() => {
-    if (categories.length === 0) return;
-    getProducts(activeCart)
-      .then((data) => {
-        setProducts(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, [activeCart, categories]);
-
-  if (loading) return <div style={{ padding: "60px", color: "var(--muted)" }}>載入中...</div>;
-  if (error) return <div style={{ padding: "60px", color: "var(--danger)" }}>錯誤：{error}</div>;
+  if (loading || error) return <PageStatus loading={loading} error={error} />;
 
   return (
     <>
-      <div className="page-title">商店 <span>全部商品</span></div>
+      <div className="page-title">
+        商店 <span>全部商品</span>
+      </div>
       <div className="cat-nav">
         {categories.map((c) => (
           <button
