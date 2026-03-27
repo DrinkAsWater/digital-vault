@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback } from "react";
-import { products } from "../data";
 import { clearAuth, getUser } from "../utils/tokenHelper";
+import { createOrder } from "../utils/ApiFuction";
 
 const AppContext = createContext(null);
 
@@ -8,7 +8,6 @@ function AppProvider({ children }) {
   const [user, setUser] = useState(getUser());
   const [authProvider, setAuthProvider] = useState(null);
   const [sessionCart, setSessionCart] = useState([]);
-  const [orders, setOrders] = useState([]);
   const [activeCart, setActiveCart] = useState(null);
   const [loginForCheckout, setLoginForCheckout] = useState(false);
   const [toasts, setToasts] = useState([]);
@@ -26,13 +25,11 @@ function AppProvider({ children }) {
   const addToCart = useCallback(
     (productId) => {
       setSessionCart((prev) => {
-        if (prev.includes(productId)) {
+        if (prev.find((p) => p.id === productId.id)) {
           showToast("ℹ️", "已在購物車中");
           return prev;
         }
-        const p = products.find((x) => x.ProductId === productId);
-        const hint = !user ? "（結帳時需要登入）" : "";
-        showToast("🛒", `${p.Name} 已加入購物車 ${hint}`);
+        showToast("🛒", "已加入購物車" + (!user ? "（結帳時需要登入）" : ""));
         return [...prev, productId];
       });
     },
@@ -41,7 +38,7 @@ function AppProvider({ children }) {
 
   const removeFromCart = useCallback(
     (productId) => {
-      setSessionCart((p) => p.filter((id) => id !== productId));
+      setSessionCart((p) => p.filter((item) => item.id !== productId));
       showToast("🗑️", "已從購物車移除");
     },
     [showToast],
@@ -58,13 +55,13 @@ function AppProvider({ children }) {
   }, []);
 
   const loginAs = useCallback(
-    (userData, provider, navigate) => {
+    (userData, provider) => {
       const wasCheckout = loginForCheckout;
       setUser(userData);
       setAuthProvider(provider);
       setLoginOpen(false);
       setLoginForCheckout(false);
-      showToast("👋", `歡迎，${userData.DisplayName}！`);
+      showToast("👋", `歡迎，${userData.displayName}！`);
       if (wasCheckout) {
         setTimeout(() => {
           showToast("🛒", "購物車已保留，繼續結帳...");
@@ -80,7 +77,7 @@ function AppProvider({ children }) {
       setUser(null);
       setAuthProvider(null);
       setSessionCart([]);
-      clearAuth(); // 清除 localStorage
+      clearAuth();
       navigate("/");
       showToast("👋", "已登出");
     },
@@ -100,43 +97,19 @@ function AppProvider({ children }) {
   }, [sessionCart.length, user, showToast, openLoginForCheckout]);
 
   const pay = useCallback(
-    (provider, navigate) => {
+    async (provider, navigate) => {
       setCheckoutOpen(false);
-      const validItems = sessionCart
-        .map((pid) =>
-          products.find((x) => x.ProductId === pid && x.IsPublished),
-        )
-        .filter(Boolean);
-      const orderItems = validItems.map((p, i) => ({
-        OrderItemId: Date.now() + i,
-        ProductId: p.ProductId,
-        ProductName: p.Name,
-        UnitPrice: p.Price,
-        Quantity: 1,
-        SubTotal: p.Price,
-      }));
-      const total = orderItems.reduce((s, i) => s + i.SubTotal, 0);
-      const order = {
-        OrderId: Date.now(),
-        UserId: user.UserId,
-        OrderNo: "DV-" + Math.random().toString(36).slice(2, 8).toUpperCase(),
-        TotalAmount: total,
-        Status: "Paid",
-        CreatedAt: new Date().toLocaleDateString("zh-TW"),
-        items: orderItems,
-        Payment: {
-          Provider: provider,
-          TransactionId: "TXN-" + Date.now(),
-          Amount: total,
-          Status: "Paid",
-        },
-      };
-      setOrders((p) => [order, ...p]);
-      setSessionCart([]);
-      navigate("/orders");
-      showToast("✅", `付款成功！訂單 ${order.OrderNo} 已建立`);
+      try {
+        const productIds = sessionCart.map((p) => p.id); // 只傳 id 給後端
+        const order = await createOrder(productIds);
+        setSessionCart([]);
+        navigate("/orders");
+        showToast("✅", `付款成功！訂單 ${order.orderNo} 已建立`);
+      } catch (err) {
+        showToast("❌", err.response?.data?.message || "建立訂單失敗");
+      }
     },
-    [sessionCart, user, showToast],
+    [sessionCart, showToast],
   );
 
   return (
@@ -148,7 +121,6 @@ function AppProvider({ children }) {
         sessionCart,
         addToCart,
         removeFromCart,
-        orders,
         activeCart,
         setActiveCart,
         loginForCheckout,
