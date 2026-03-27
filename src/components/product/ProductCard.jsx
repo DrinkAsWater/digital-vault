@@ -2,7 +2,7 @@ import { useApp } from "../../context/AppContext";
 
 const ProductCard = ({ product, onDetail }) => {
   const { sessionCart, addToCart } = useApp();
-  const inCart = sessionCart.includes(product.id);
+  const inCart = sessionCart.some((p) => p.id === product.id);
 
   return (
     <div className="card">
@@ -21,7 +21,7 @@ const ProductCard = ({ product, onDetail }) => {
             className={`btn-cart ${inCart ? "added" : ""}`}
             onClick={(e) => {
               e.stopPropagation();
-              addToCart(product.id);
+              addToCart(product);
             }}
           >
             {inCart ? "✓ 已加入" : "加入購物車"}
