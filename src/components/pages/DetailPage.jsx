@@ -1,9 +1,9 @@
+// pages/DetailPage.jsx
 import { useParams } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
-import { Stars } from "../ui/Stars";
 import PageStatus from "../ui/PageStatus";
-import { reviews } from "../../data";
 import { useProductDetail } from "../../hook/useProduct";
+import ReviewSection from "../review/ReviewSection.jsx";
 
 const INCLUDES = [
   "即時數位下載",
@@ -11,17 +11,18 @@ const INCLUDES = [
   "購買憑證（OrderItems 記錄）",
   "30 天退款保障",
 ];
+// 模擬用，交易實作後移除
+const MOCK_ORDER_ID = "00000000-0000-0000-0000-000000000001";
 
 const DetailPage = () => {
   const { id } = useParams();
-  const { sessionCart, addToCart, isGuest } = useApp();
+  const { sessionCart, addToCart, isGuest, currentUser, userOrderId } = useApp();
   const { product, loading, error } = useProductDetail(id);
 
   if (loading || error) return <PageStatus loading={loading} error={error} />;
   if (!product) return null;
 
   const inCart = sessionCart.includes(product.id);
-  const pReviews = reviews.filter((r) => r.ProductId === product.id);
 
   return (
     <>
@@ -36,9 +37,7 @@ const DetailPage = () => {
           <div className="detail-includes">
             <h4>包含內容</h4>
             {INCLUDES.map((item) => (
-              <div key={item} className="include-item">
-                {item}
-              </div>
+              <div key={item} className="include-item">{item}</div>
             ))}
           </div>
           <div className="detail-price-row">
@@ -57,32 +56,14 @@ const DetailPage = () => {
           </div>
         </div>
       </div>
-      <div className="reviews-section">
-        <div className="section-title" style={{ marginBottom: "20px" }}>
-          用戶評論 <span style={{ color: "var(--cyan)" }}>(Reviews)</span>
-        </div>
-        {pReviews.length === 0 ? (
-          <div className="empty-state" style={{ padding: "40px" }}>
-            <div className="empty-icon">💬</div>
-            <h3>尚無評論</h3>
-            <p>購買後即可留下評論</p>
-          </div>
-        ) : (
-          pReviews.map((r) => (
-            <div key={r.ReviewId} className="review-card">
-              <div className="review-header">
-                <div className="reviewer-avatar">{r.DisplayName[0]}</div>
-                <div>
-                  <div className="reviewer-name">{r.DisplayName}</div>
-                  <Stars rating={r.Rating} size="0.7rem" />
-                </div>
-                <span className="review-date">{r.CreatedAt}</span>
-              </div>
-              <div className="review-text">{r.Comment}</div>
-            </div>
-          ))
-        )}
-      </div>
+
+      {/* 評論區塊 — 替換原本的靜態 reviews */}
+      <ReviewSection
+        productId={product.id}
+        currentUserId={currentUser?.id ?? null}
+        //userOrderId={userOrderId ?? null} 
+        userOrderId={isGuest() ? null : MOCK_ORDER_ID}  // 模擬用，交易實作後移除
+      />
     </>
   );
 };

@@ -13,6 +13,7 @@ function AppProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const [loginOpen, setLoginOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [userOrders, setUserOrders] = useState([]);
 
   const showToast = useCallback((icon, msg) => {
     const id = Date.now() + Math.random();
@@ -116,6 +117,8 @@ function AppProvider({ children }) {
     <AppContext.Provider
       value={{
         user,
+        currentUserId: user?.id ?? null,
+        userOrders,
         authProvider,
         isGuest,
         sessionCart,
