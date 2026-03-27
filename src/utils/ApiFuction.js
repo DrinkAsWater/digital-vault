@@ -49,3 +49,54 @@ export const getProductById = async (id) => {
   const res = await axios.get(`${BASE_URL}/product/${id}`);
   return res.data;
 };
+
+
+// 取得商品的所有評論（公開）
+export const getReviewsByProduct = async (productId) => {
+  const res = await axios.get(`${BASE_URL}/review/product/${productId}`);
+  return res.data;
+};
+
+// 取得單筆評論（公開）
+export const getReviewById = async (id) => {
+  const res = await axios.get(`${BASE_URL}/review/${id}`);
+  return res.data;
+};
+
+// 取得自己的評論（需登入）
+export const getMyReviews = async () => {
+  const res = await axios.get(`${BASE_URL}/review/my`, {
+    headers: getHeader(),
+  });
+  return res.data;
+};
+
+// 新增評論（需登入）
+export const createReview = async (productId, orderId, rating, comment) => {
+  const res = await axios.post(
+    `${BASE_URL}/review`,
+    { productId, orderId, rating, comment },
+    { headers: getHeader() }
+  );
+  return res.data;
+};
+
+// 修改評論（需登入）
+export const updateReview = async (id, rating, comment) => {
+  const res = await axios.put(
+    `${BASE_URL}/review/${id}`,
+    { rating, comment },
+    { headers: getHeader() }
+  );
+  return res.data;
+};
+
+// 刪除評論（需登入）
+export const deleteReview = async (id) => {
+  const res = await axios.delete(`${BASE_URL}/review/${id}`, {
+    headers: getHeader(),
+  });
+  return res.data;
+};
+
+
