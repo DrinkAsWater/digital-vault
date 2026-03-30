@@ -15,7 +15,7 @@ const MOCK_ORDER_ID = "20276BB8-3D41-4BDE-B44E-E2D686A7CDD9";
 
 const DetailPage = () => {
   const { id } = useParams();
-  const { sessionCart, addToCart, isGuest, user } = useApp();
+  const { sessionCart, addToCart, isGuest, user, currentUserId } = useApp();
   const { product, loading, error } = useProductDetail(id);
   //   console.log('user:', user);  // 加這行
   // console.log('MOCK_ORDER_ID:', MOCK_ORDER_ID);  // 加這行
@@ -62,7 +62,7 @@ const DetailPage = () => {
 
       <ReviewSection
         productId={product.id}
-        currentUserId={user?.id ?? null}
+        currentUserId={currentUserId}
         userOrderId={isGuest() ? null : MOCK_ORDER_ID}
       />
     </>

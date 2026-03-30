@@ -12,9 +12,7 @@ const ReviewCard = ({
   const [editing, setEditing] = useState(false);
   const isOwner = currentUserId && review.userId === currentUserId;
 
-  console.log("currentUserId:", currentUserId);
-  console.log("review.userId:", review.userId);
-  console.log("isOwner:", isOwner);
+ 
 
   // 修正：改成接收物件 { rating, comment }
   const handleUpdate = async ({ rating, comment }) => {

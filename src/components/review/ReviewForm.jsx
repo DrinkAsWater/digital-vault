@@ -47,7 +47,7 @@ const ReviewForm = ({
           </button>
         )}
         <button type="submit" className="btn-submit" disabled={submitting}>
-          {submitting ? "送出中..." : existing ? "更新評論" : "送出評論"}
+          {submitting ? "送出中..." : existingReview ? "更新評論" : "送出評論"}
         </button>
       </div>
     </form>

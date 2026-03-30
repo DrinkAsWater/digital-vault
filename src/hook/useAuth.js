@@ -13,11 +13,13 @@ const useAuth = () => {
       const data = await login(email, password);
       //儲存token和資訊
       saveAuth(data.token, {
+        id: data.id, // ✅ 加這行
         email: data.email,
         displayName: data.displayName,
         role: data.role,
       });
       onSuccess({
+        id: data.id, // ✅ 加這行
         email: data.email,
         displayName: data.displayName,
         role: data.role,
