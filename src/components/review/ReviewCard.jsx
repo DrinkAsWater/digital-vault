@@ -2,11 +2,22 @@ import { useState } from "react";
 import { Stars } from "../ui/Stars";
 import ReviewForm from "./ReviewForm";
 
-const ReviewCard = ({ review, currentUserId, onUpdate, onDelete, submitting }) => {
+const ReviewCard = ({
+  review,
+  currentUserId,
+  onUpdate,
+  onDelete,
+  submitting,
+}) => {
   const [editing, setEditing] = useState(false);
   const isOwner = currentUserId && review.userId === currentUserId;
 
-  const handleUpdate = async (productId, orderId, rating, comment) => {
+  console.log("currentUserId:", currentUserId);
+  console.log("review.userId:", review.userId);
+  console.log("isOwner:", isOwner);
+
+  // 修正：改成接收物件 { rating, comment }
+  const handleUpdate = async ({ rating, comment }) => {
     const success = await onUpdate(review.id, rating, comment);
     if (success) setEditing(false);
   };
@@ -14,7 +25,6 @@ const ReviewCard = ({ review, currentUserId, onUpdate, onDelete, submitting }) =
   return (
     <div className="review-card">
       <div className="review-header">
-        {/* 問題1修正：用 optional chaining 保護 */}
         <div className="reviewer-avatar">
           {review.userDisplayName?.[0] ?? "?"}
         </div>
@@ -43,7 +53,6 @@ const ReviewCard = ({ review, currentUserId, onUpdate, onDelete, submitting }) =
 
       {editing ? (
         <ReviewForm
-          // 問題2修正：直接傳 review，不要多包一層
           existingReview={review}
           submitting={submitting}
           onSubmit={handleUpdate}
