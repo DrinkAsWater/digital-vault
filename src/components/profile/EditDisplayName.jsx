@@ -1,24 +1,20 @@
 import { useState } from "react";
+import { useUpdateDisplayName } from "../../hook/useProfile";
 
 const EditDisplayName = ({ user }) => {
   const [displayName, setDisplayName] = useState(user.displayName);
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState("");
+  const { loading, error, setError, submit } = useUpdateDisplayName();
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!displayName.trim()) {
       setError("顯示名稱不能為空");
       return;
     }
-    setLoading(true);
-    setError(null);
-    // TODO: 串接 PUT /api/user/displayName
-    setTimeout(() => {
-      setLoading(false);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 2000);
-    }, 800);
+    submit(displayName, (message) => {
+      setSuccess(message);
+      setTimeout(() => setSuccess(""), 2000);
+    });
   };
 
   return (
@@ -64,7 +60,7 @@ const EditDisplayName = ({ user }) => {
             marginBottom: "12px",
           }}
         >
-          ✓ 修改成功
+          ✓ {success}
         </div>
       )}
       <div className="form-group">

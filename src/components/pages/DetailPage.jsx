@@ -1,9 +1,8 @@
-// pages/DetailPage.jsx
 import { useParams } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
 import PageStatus from "../ui/PageStatus";
 import { useProductDetail } from "../../hook/useProduct";
-import ReviewSection from "../review/ReviewSection.jsx";
+import ReviewSection from "../review/ReviewSection";
 
 const INCLUDES = [
   "即時數位下載",
@@ -11,18 +10,20 @@ const INCLUDES = [
   "購買憑證（OrderItems 記錄）",
   "30 天退款保障",
 ];
-// 模擬用，交易實作後移除
-const MOCK_ORDER_ID = "00000000-0000-0000-0000-000000000001";
+
+const MOCK_ORDER_ID = "20276BB8-3D41-4BDE-B44E-E2D686A7CDD9";
 
 const DetailPage = () => {
   const { id } = useParams();
-  const { sessionCart, addToCart, isGuest, currentUser, userOrderId } = useApp();
+  const { sessionCart, addToCart, isGuest, user } = useApp();
   const { product, loading, error } = useProductDetail(id);
+  //   console.log('user:', user);  // 加這行
+  // console.log('MOCK_ORDER_ID:', MOCK_ORDER_ID);  // 加這行
 
   if (loading || error) return <PageStatus loading={loading} error={error} />;
   if (!product) return null;
 
-  const inCart = sessionCart.includes(product.id);
+  const inCart = sessionCart.some((p) => p.id === product.id);
 
   return (
     <>
@@ -37,14 +38,16 @@ const DetailPage = () => {
           <div className="detail-includes">
             <h4>包含內容</h4>
             {INCLUDES.map((item) => (
-              <div key={item} className="include-item">{item}</div>
+              <div key={item} className="include-item">
+                {item}
+              </div>
             ))}
           </div>
           <div className="detail-price-row">
             <span className="detail-price">${product.price}</span>
             <button
               className={`btn-add-cart ${inCart ? "added" : ""}`}
-              onClick={() => addToCart(product.id)}
+              onClick={() => addToCart(product)}
             >
               {inCart ? "✓ 已加入購物車" : "加入購物車"}
             </button>
@@ -57,12 +60,10 @@ const DetailPage = () => {
         </div>
       </div>
 
-      {/* 評論區塊 — 替換原本的靜態 reviews */}
       <ReviewSection
         productId={product.id}
-        currentUserId={currentUser?.id ?? null}
-        //userOrderId={userOrderId ?? null} 
-        userOrderId={isGuest() ? null : MOCK_ORDER_ID}  // 模擬用，交易實作後移除
+        currentUserId={user?.id ?? null}
+        userOrderId={isGuest() ? null : MOCK_ORDER_ID}
       />
     </>
   );

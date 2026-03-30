@@ -3,26 +3,28 @@ import { useNavigate } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
 import EmptyState from "../ui/EmptyState";
 import PageStatus from "../ui/PageStatus";
-import { useMyOrders } from "../../hook/useOrders";
+import { useMyOrders, useCancelOrder } from "../../hook/useOrders";
 import OrderReviewModal from "../modal/OrderReviewModal";
 
 const STATUS_CLASS = {
-  Paid: "status-paid",
-  Completed: "status-completed",
-  Unpaid: "status-unpaid",
+  0: "status-unpaid",
+  1: "status-paid",
+  2: "status-completed",
+  3: "status-unpaid",
 };
 
 const getStatusLabel = (status) => {
   if (status === 0) return "未付款";
   if (status === 1) return "已付款";
   if (status === 2) return "已完成";
-  return "已刪除";
+  return "已取消";
 };
 
 const OrdersPage = () => {
   const navigate = useNavigate();
   const { isGuest, openLogin, showToast } = useApp();
-  const { orders, loading, error } = useMyOrders();
+  const { orders, loading, error, refetch } = useMyOrders();
+  const { cancel, loading: cancelling } = useCancelOrder();
   const [reviewingOrder, setReviewingOrder] = useState(null);
 
   if (isGuest())
@@ -30,7 +32,9 @@ const OrdersPage = () => {
       <div className="orders-page">
         <EmptyState icon="🔐" title="請先登入查看訂單">
           <p style={{ marginTop: "12px" }}>
-            <button className="btn-primary" onClick={openLogin}>登入</button>
+            <button className="btn-primary" onClick={openLogin}>
+              登入
+            </button>
           </p>
         </EmptyState>
       </div>
@@ -57,7 +61,9 @@ const OrdersPage = () => {
         <div key={order.id} className="order-card">
           <div className="order-header">
             <div className="order-no">訂單 {order.orderNo}</div>
-            <div className={`order-status ${STATUS_CLASS[order.status] || "status-unpaid"}`}>
+            <div
+              className={`order-status ${STATUS_CLASS[order.status] || "status-unpaid"}`}
+            >
               {getStatusLabel(order.status)}
             </div>
           </div>
@@ -77,7 +83,28 @@ const OrdersPage = () => {
               📅 {new Date(order.createdAt).toLocaleDateString("zh-TW")}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              {/* status === 2 才顯示評論按鈕 */}
+              {/* 只有未付款才能取消 */}
+              {order.status === 0 && (
+                <button
+                  className="btn-outline"
+                  style={{
+                    padding: "6px 14px",
+                    fontSize: "0.8rem",
+                    color: "var(--danger)",
+                    borderColor: "var(--danger)",
+                  }}
+                  disabled={cancelling}
+                  onClick={() =>
+                    cancel(order.id, () => {
+                      showToast("✅", "訂單已取消");
+                      refetch();
+                    })
+                  }
+                >
+                  取消訂單
+                </button>
+              )}
+              {/* 已完成才能評論 */}
               {order.status === 2 && (
                 <button
                   className="btn-review"
@@ -92,12 +119,14 @@ const OrdersPage = () => {
         </div>
       ))}
 
-      {/* 評論 Modal */}
       {reviewingOrder && (
         <OrderReviewModal
           order={reviewingOrder}
           onClose={() => setReviewingOrder(null)}
-          onSuccess={() => showToast("✅", "評論已送出！")}
+          onSuccess={() => {
+            showToast("✅", "評論已送出！");
+            setReviewingOrder(null);
+          }}
         />
       )}
     </div>

@@ -1,14 +1,14 @@
 import { useState } from "react";
+import { useUpdatePassword } from "../../hook/useProfile";
 
 const EditPassword = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState("");
+  const { loading, error, setError, submit } = useUpdatePassword();
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     setError(null);
     if (!currentPassword) {
       setError("請輸入目前密碼");
@@ -22,16 +22,14 @@ const EditPassword = () => {
       setError("新密碼與確認密碼不一致");
       return;
     }
-    setLoading(true);
-    // TODO: 串接 PUT /api/user/password
-    setTimeout(() => {
-      setLoading(false);
-      setSuccess(true);
+
+    submit(currentPassword, newPassword, (message) => {
+      setSuccess(message);
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setTimeout(() => setSuccess(false), 2000);
-    }, 800);
+      setTimeout(() => setSuccess(""), 2000);
+    });
   };
 
   return (
@@ -77,7 +75,7 @@ const EditPassword = () => {
             marginBottom: "12px",
           }}
         >
-          ✓ 密碼修改成功
+          ✓ {success}
         </div>
       )}
       <div className="form-group">

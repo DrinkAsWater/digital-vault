@@ -2,7 +2,7 @@ import axios from "axios";
 import { getToken } from "./tokenHelper";
 const BASE_URL = import.meta.env.VITE_API_URL || "https://localhost:7124/api";
 export const getHeader = () => {
-  const token = getToken(); 
+  const token = getToken();
   return {
     ...(token && { Authorization: `Bearer ${token}` }),
     "Content-Type": "application/json",
@@ -54,7 +54,7 @@ export const createOrder = async (productIds) => {
   return res.data;
 };
 // 需要驗證的請求才帶 header，例如取得購物車、訂單
-export const getOrders = async () => {
+export const getMyOrders = async () => {
   const res = await axios.get(`${BASE_URL}/order`, { headers: getHeader() });
   return res.data;
 };
@@ -65,7 +65,15 @@ export const getOrderById = async (id) => {
   });
   return res.data;
 };
-
+// 取消訂單，需要驗證
+export const cancelOrder = async (id) => {
+  const res = await axios.put(
+    `${BASE_URL}/order/${id}/cancel`,
+    {},
+    { headers: getHeader() },
+  );
+  return res.data;
+};
 
 // 取得商品的所有評論（公開）
 export const getReviewsByProduct = async (productId) => {
@@ -92,7 +100,7 @@ export const createReview = async (productId, orderId, rating, comment) => {
   const res = await axios.post(
     `${BASE_URL}/review`,
     { productId, orderId, rating, comment },
-    { headers: getHeader() }
+    { headers: getHeader() },
   );
   return res.data;
 };
@@ -102,7 +110,7 @@ export const updateReview = async (id, rating, comment) => {
   const res = await axios.put(
     `${BASE_URL}/review/${id}`,
     { rating, comment },
-    { headers: getHeader() }
+    { headers: getHeader() },
   );
   return res.data;
 };
@@ -115,4 +123,28 @@ export const deleteReview = async (id) => {
   return res.data;
 };
 
-
+// 取得已購商品（需登入）
+export const getPurchases = async () => {
+  const res = await axios.get(`${BASE_URL}/user/purchases`, {
+    headers: getHeader(),
+  });
+  return res.data;
+};
+// 修改顯示名稱，需要驗證
+export const updateDisplayName = async (displayName) => {
+  const res = await axios.put(
+    `${BASE_URL}/user/displayName`,
+    { displayName },
+    { headers: getHeader() },
+  );
+  return res.data;
+};
+// 修改密碼，需要驗證
+export const updatePassword = async (currentPassword, newPassword) => {
+  const res = await axios.put(
+    `${BASE_URL}/user/password`,
+    { currentPassword, newPassword },
+    { headers: getHeader() },
+  );
+  return res.data;
+};
