@@ -105,7 +105,7 @@ const OrdersPage = () => {
                 </button>
               )}
               {/* 已完成才能評論 */}
-              {order.status === 2 && (
+              {(order.status === 1 || order.status === 2) && (
                 <button
                   className="btn-review"
                   onClick={() => setReviewingOrder(order)}
