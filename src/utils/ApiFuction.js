@@ -148,3 +148,38 @@ export const updatePassword = async (currentPassword, newPassword) => {
   );
   return res.data;
 };
+// 建立付款，需要驗證
+export const createPayment = async (orderId, provider, cardInfo = {}) => {
+  const res = await axios.post(
+    `${BASE_URL}/payment`,
+    { orderId, provider, ...cardInfo },
+    { headers: getHeader() },
+  );
+  return res.data;
+};
+
+// 取得訂單付款紀錄，需要驗證
+export const getPaymentByOrder = async (orderId) => {
+  const res = await axios.get(`${BASE_URL}/payment/order/${orderId}`, {
+    headers: getHeader(),
+  });
+  return res.data;
+};
+
+// 模擬超商繳費確認
+export const confirmCVSPayment = async (paymentId) => {
+  const res = await axios.put(
+    `${BASE_URL}/payment/${paymentId}/cvs-confirm`,
+    {},
+    { headers: getHeader() },
+  );
+  return res.data;
+};
+
+// 取得訂單下載連結，需要驗證
+export const getDownload = async (orderId) => {
+  const res = await axios.get(`${BASE_URL}/order/${orderId}/download`, {
+    headers: getHeader(),
+  });
+  return res.data;
+};

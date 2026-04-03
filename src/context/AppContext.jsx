@@ -13,7 +13,7 @@ function AppProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const [loginOpen, setLoginOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [userOrders, setUserOrders] = useState([]);
+  const [pendingOrderId, setPendingOrderId] = useState(null); // ✅ 新增：暫存 orderId
 
   const showToast = useCallback((icon, msg) => {
     const id = Date.now() + Math.random();
@@ -24,14 +24,14 @@ function AppProvider({ children }) {
   const isGuest = () => !user;
 
   const addToCart = useCallback(
-    (productId) => {
+    (product) => {
       setSessionCart((prev) => {
-        if (prev.find((p) => p.id === productId.id)) {
+        if (prev.find((p) => p.id === product.id)) {
           showToast("ℹ️", "已在購物車中");
           return prev;
         }
         showToast("🛒", "已加入購物車" + (!user ? "（結帳時需要登入）" : ""));
-        return [...prev, productId];
+        return [...prev, product];
       });
     },
     [user, showToast],
@@ -78,6 +78,7 @@ function AppProvider({ children }) {
       setUser(null);
       setAuthProvider(null);
       setSessionCart([]);
+      setPendingOrderId(null);
       clearAuth();
       navigate("/");
       showToast("👋", "已登出");
@@ -94,31 +95,22 @@ function AppProvider({ children }) {
       openLoginForCheckout();
       return;
     }
-    setCheckoutOpen(true);
+    setCheckoutOpen(true); // 只開 Modal，不建立訂單
   }, [sessionCart.length, user, showToast, openLoginForCheckout]);
 
-  const pay = useCallback(
-    async (provider, navigate) => {
-      setCheckoutOpen(false);
-      try {
-        const productIds = sessionCart.map((p) => p.id); // 只傳 id 給後端
-        const order = await createOrder(productIds);
-        setSessionCart([]);
-        navigate("/orders");
-        showToast("✅", `付款成功！訂單 ${order.orderNo} 已建立`);
-      } catch (err) {
-        showToast("❌", err.response?.data?.message || "建立訂單失敗");
-      }
-    },
-    [sessionCart, showToast],
-  );
+  // ✅ pay：用 pendingOrderId 付款
+  const pay = useCallback(async (navigate) => {
+    setSessionCart([]);
+    setPendingOrderId(null);
+    setCheckoutOpen(false);
+    navigate("/orders");
+  }, []);
 
   return (
     <AppContext.Provider
       value={{
         user,
         currentUserId: user?.id ?? null,
-        userOrders,
         authProvider,
         isGuest,
         sessionCart,
@@ -134,6 +126,7 @@ function AppProvider({ children }) {
         openLoginForCheckout,
         checkoutOpen,
         setCheckoutOpen,
+        pendingOrderId, // ✅ 傳給 CheckoutModal 用
         loginAs,
         logout,
         checkout,

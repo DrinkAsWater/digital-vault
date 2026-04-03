@@ -4,6 +4,7 @@ import {
   getMyOrders,
   getOrderById,
   cancelOrder,
+  getDownload,
 } from "../utils/ApiFuction";
 
 // 取得我的訂單列表
@@ -59,6 +60,26 @@ export const useCreateOrder = () => {
   };
 
   return { loading, error, submitOrder };
+};
+// 取得下載連結
+export const useDownload = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [downloads, setDownloads] = useState(null);
+
+  const fetchDownload = async (orderId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getDownload(orderId);
+      setDownloads(data);
+    } catch (err) {
+      setError(err.response?.data?.message || "取得下載連結失敗");
+    } finally {
+      setLoading(false);
+    }
+  };
+  return { downloads, loading, error, fetchDownload };
 };
 
 // 取消訂單

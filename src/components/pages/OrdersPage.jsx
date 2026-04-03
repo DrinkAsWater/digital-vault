@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
 import EmptyState from "../ui/EmptyState";
 import PageStatus from "../ui/PageStatus";
-import { useMyOrders, useCancelOrder } from "../../hook/useOrders";
+import { useMyOrders, useCancelOrder, useDownload } from "../../hook/useOrders";
 import OrderReviewModal from "../modal/OrderReviewModal";
+import DownloadModal from "../modal/DownloadModal";
 
 const STATUS_CLASS = {
   0: "status-unpaid",
@@ -25,7 +26,9 @@ const OrdersPage = () => {
   const { isGuest, openLogin, showToast } = useApp();
   const { orders, loading, error, refetch } = useMyOrders();
   const { cancel, loading: cancelling } = useCancelOrder();
+  const { downloads, loading: downloading, fetchDownload } = useDownload();
   const [reviewingOrder, setReviewingOrder] = useState(null);
+  const [showDownload, setShowDownload] = useState(false);
 
   if (isGuest())
     return (
@@ -104,20 +107,42 @@ const OrdersPage = () => {
                   取消訂單
                 </button>
               )}
-              {/* 已完成才能評論 */}
+              {/* 已付款或已完成 → 下載 + 評論 */}
               {(order.status === 1 || order.status === 2) && (
-                <button
-                  className="btn-review"
-                  onClick={() => setReviewingOrder(order)}
-                >
-                  💬 評論商品
-                </button>
+                <>
+                  <button
+                    className="btn-cart"
+                    style={{ whiteSpace: "nowrap" }}
+                    disabled={downloading}
+                    onClick={async () => {
+                      await fetchDownload(order.id);
+                      setShowDownload(true);
+                      refetch();
+                    }}
+                  >
+                    ⬇ 下載
+                  </button>
+                  <button
+                    className="btn-review"
+                    onClick={() => setReviewingOrder(order)}
+                  >
+                    💬 評論商品
+                  </button>
+                </>
               )}
               <div className="order-total">${order.totalAmount}</div>
             </div>
           </div>
         </div>
       ))}
+
+      {/* 下載 Modal */}
+      {showDownload && downloads && (
+        <DownloadModal
+          downloads={downloads}
+          onClose={() => setShowDownload(false)}
+        />
+      )}
 
       {reviewingOrder && (
         <OrderReviewModal
