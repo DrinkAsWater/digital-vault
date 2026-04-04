@@ -1,3 +1,4 @@
+```mermaid
 sequenceDiagram
     participant C as Client (React)
     participant B as 瀏覽器 Cookie
@@ -40,3 +41,4 @@ sequenceDiagram
         S-->>B: Set-Cookie: refresh_token=; Max-Age=0
         S-->>C: 200 OK 登出成功
     end
+```
