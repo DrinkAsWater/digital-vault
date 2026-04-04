@@ -1,1 +1,1 @@
-![HttpOnly Cookie Auth Flow](./docs/HttpOnlyCookieAuthFlow.svg)
+![HttpOnly Cookie Auth Flow](./HttpOnlyCookieAuthFlow.svg)
