@@ -1,6 +1,11 @@
 import { createContext, useContext, useState, useCallback } from "react";
-import { clearAuth, getToken, getUser } from "../utils/tokenHelper";
-import { apiLogout, createOrder } from "../utils/ApiFuction";
+import {
+  clearAuth,
+  getRefreshToken,
+  getToken,
+  getUser,
+} from "../utils/tokenHelper";
+import { apiLogout, createOrder, refreshToken } from "../utils/ApiFuction";
 
 const AppContext = createContext(null);
 
@@ -77,7 +82,8 @@ function AppProvider({ children }) {
     async (navigate) => {
       try {
         const token = getToken();
-        if (token) await apiLogout(token); // 呼叫後端黑名單 API
+        const refreshToken = getRefreshToken();
+        if (token) await apiLogout(token, refreshToken); // 呼叫後端黑名單 API
       } catch (e) {
         console.error("登出 API 失敗", e);
       } finally {

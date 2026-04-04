@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
 import { saveAuth } from "../../utils/tokenHelper";
 
-// 解析 JWT payload
 const parseJwt = (token) => {
   try {
     const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
@@ -20,19 +19,20 @@ const AuthCallback = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
+    const refreshToken = params.get("refreshToken");
 
     if (!token) {
       navigate("/");
       return;
     }
 
-    // 解析 JWT 取得 user 資訊
     const payload = parseJwt(token);
     if (!payload) {
       navigate("/");
       return;
     }
 
+    // user 先定義再使用
     const user = {
       id: payload.sub,
       email: payload.email,
@@ -43,7 +43,7 @@ const AuthCallback = () => {
       ],
     };
 
-    saveAuth(token, user);
+    saveAuth(token, user, refreshToken); // ← 放在 user 定義之後
     loginAs(user, "google");
     navigate("/");
   }, [navigate, loginAs]);

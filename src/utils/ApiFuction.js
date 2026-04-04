@@ -185,10 +185,10 @@ export const getDownload = async (orderId) => {
 };
 
 // 登出 - 將 token 加入黑名單
-export const apiLogout = async (token) => {
+export const apiLogout = async (token, refreshToken) => {
   const res = await axios.post(
     `${BASE_URL}/auth/logout`,
-    { token },
+    { token, refreshToken },
     { headers: getHeader() },
   );
   return res.data;
