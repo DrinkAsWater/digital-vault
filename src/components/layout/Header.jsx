@@ -1,5 +1,5 @@
-import { useNavigate } from 'react-router-dom';
-import { useApp } from '../../context/AppContext';
+import { useNavigate } from "react-router-dom";
+import { useApp } from "../../context/AppContext";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -19,21 +19,36 @@ const Header = () => {
         {!user ? (
           <>
             <div className="guest-badge">
-              <div className="guest-dot" />訪客
+              <div className="guest-dot" />
+              訪客
             </div>
-            <button className="btn-login" onClick={openLogin}>登入 / 註冊</button>
+            <button className="btn-login" onClick={openLogin}>
+              登入 / 註冊
+            </button>
           </>
         ) : (
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <div className="nav-avatar" onClick={() => navigate("/profile")} title={user.displayName}>
+            <div
+              className="nav-avatar"
+              onClick={() => navigate("/profile")}
+              title={user.displayName}
+            >
               {user.displayName[0].toUpperCase()}
             </div>
-            <button className="nav-cart" style={{ fontSize: "0.78rem" }} onClick={() => navigate("/orders")}>
+            <button
+              className="nav-cart"
+              style={{ fontSize: "0.78rem" }}
+              onClick={() => navigate("/orders")}
+            >
               我的訂單
             </button>
             <button
               className="btn-login"
-              style={{ background: "var(--surface)", color: "var(--muted)", border: "1px solid var(--border)" }}
+              style={{
+                background: "var(--surface)",
+                color: "var(--muted)",
+                border: "1px solid var(--border)",
+              }}
               onClick={() => logout(navigate)}
             >
               登出
@@ -43,6 +58,6 @@ const Header = () => {
       </nav>
     </header>
   );
-}
+};
 
 export default Header;

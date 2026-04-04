@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useApp } from "../../context/AppContext";
 import useAuth from "../../hook/useAuth"; // ← 修正路徑
+import { googleLogin } from "../../utils/ApiFuction";
 
 const LoginModal = () => {
   const { loginOpen, closeLogin, loginAs, loginForCheckout } = useApp();
@@ -109,7 +110,7 @@ const LoginModal = () => {
         )}
 
         {/* Google 登入 */}
-        <button className="btn-google" onClick={onGoogleSuccess}>
+        <button className="btn-google" onClick={googleLogin}>
           <div className="google-icon" />
           使用 Google 帳號登入
         </button>

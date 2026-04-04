@@ -1,6 +1,16 @@
 import { useState } from "react";
-import { clearAuth, saveAuth } from "../utils/tokenHelper";
-import { login, register } from "../utils/ApiFuction";
+import {
+  clearAuth,
+  saveAuth,
+  getToken,
+  getRefreshToken,
+} from "../utils/tokenHelper";
+import {
+  login,
+  register,
+ apiLogout,
+  refreshToken as apiRefresh,
+} from "../utils/ApiFuction";
 
 const useAuth = () => {
   const [loading, setLoading] = useState(false);
@@ -11,25 +21,29 @@ const useAuth = () => {
     setError(null);
     try {
       const data = await login(email, password);
-      //儲存token和資訊
-      saveAuth(data.token, {
-        id: data.id, // ✅ 加這行
-        email: data.email,
-        displayName: data.displayName,
-        role: data.role,
-      });
+      saveAuth(
+        data.token,
+        {
+          id: data.id,
+          email: data.email,
+          displayName: data.displayName,
+          role: data.role,
+        },
+        data.refreshToken,
+      );
       onSuccess({
-        id: data.id, // ✅ 加這行
+        id: data.id,
         email: data.email,
         displayName: data.displayName,
         role: data.role,
       });
     } catch (e) {
-      setError(e.response?.data.message || "登入失敗，請確認帳號密碼");
+      setError(e.response?.data?.message || "登入失敗，請確認帳號密碼");
     } finally {
       setLoading(false);
     }
   };
+
   const handleRegister = async (email, displayName, password, onSuccess) => {
     setLoading(true);
     setError(null);
@@ -42,9 +56,40 @@ const useAuth = () => {
       setLoading(false);
     }
   };
-  const handleLogout = (navigate) => {
-    clearAuth();
-    navigate("/");
+
+  const handleLogout = async (navigate) => {
+    try {
+      const token = getToken();
+      if (token) await apiLogout(token);
+    } catch (e) {
+      console.error("登出 API 失敗", e);
+    } finally {
+      clearAuth();
+      navigate("/");
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      const oldToken = getToken();
+      const refresh = getRefreshToken();
+      if (!refresh || !oldToken) return null;
+      const data = await apiRefresh(refresh, oldToken);
+      saveAuth(
+        data.token,
+        {
+          id: data.id,
+          email: data.email,
+          displayName: data.displayName,
+          role: data.role,
+        },
+        data.refreshToken,
+      );
+      return data;
+    } catch (e) {
+      clearAuth();
+      return null;
+    }
   };
 
   return {
@@ -54,6 +99,8 @@ const useAuth = () => {
     handleLogin,
     handleRegister,
     handleLogout,
+    handleRefresh,
   };
 };
+
 export default useAuth;

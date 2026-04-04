@@ -183,3 +183,27 @@ export const getDownload = async (orderId) => {
   });
   return res.data;
 };
+
+// 登出 - 將 token 加入黑名單
+export const apiLogout = async (token) => {
+  const res = await axios.post(
+    `${BASE_URL}/auth/logout`,
+    { token },
+    { headers: getHeader() },
+  );
+  return res.data;
+};
+
+// Refresh Token
+export const refreshToken = async (refreshToken, oldLoginToken) => {
+  const res = await axios.post(`${BASE_URL}/auth/refresh`, {
+    refreshToken,
+    oldLoginToken,
+  });
+  return res.data;
+};
+
+// Google 登入入口
+export const googleLogin = () => {
+  window.location.href = `${BASE_URL}/auth/google`;
+};
