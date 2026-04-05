@@ -18,6 +18,13 @@ const CartPage = lazy(() => import("./components/pages/CartPage"));
 const OrdersPage = lazy(() => import("./components/pages/OrdersPage"));
 const ProfilePage = lazy(() => import("./components/pages/ProfilePage"));
 const AuthCallback = lazy(() => import("./components/pages/AuthCallback"));
+const AdminPage = lazy(() => import("./components/pages/AdminPage"));
+const AdminProductPage = lazy(() => import("./components/pages/AdminProductPage"),
+);
+const AdminOrderPage = lazy(() => import("./components/pages/AdminOrderPage"));
+const AdminUserPage = lazy(() => import("./components/pages/AdminUserPage"));
+const AdminReviewPage = lazy(() => import("./components/pages/AdminReviewPage"),
+);
 
 const App = () => {
   return (
@@ -56,6 +63,46 @@ const App = () => {
                         <AuthRoute>
                           <ProfilePage />
                         </AuthRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin"
+                      element={
+                        <AdminRoute require="manager">
+                          <AdminPage />
+                        </AdminRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/products"
+                      element={
+                        <AdminRoute require="manager">
+                          <AdminProductPage />
+                        </AdminRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/orders"
+                      element={
+                        <AdminRoute require="support">
+                          <AdminOrderPage />
+                        </AdminRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/users"
+                      element={
+                        <AdminRoute require="admin">
+                          <AdminUserPage />
+                        </AdminRoute>
+                      }
+                    />
+                    <Route
+                      path="/admin/reviews"
+                      element={
+                        <AdminRoute require="support">
+                          <AdminReviewPage />
+                        </AdminRoute>
                       }
                     />
                   </Routes>
