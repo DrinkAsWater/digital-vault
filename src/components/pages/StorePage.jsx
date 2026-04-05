@@ -1,10 +1,10 @@
-import { useApp } from "../../context/AppContext";
+import { useCart } from "../../context/CartContext";
 import { useCategories, useProducts } from "../../hook/useProduct";
 import ProductGrid from "../product/ProductGrid";
 import PageStatus from "../ui/PageStatus";
 
 const StorePage = () => {
-  const { activeCart, setActiveCart } = useApp();
+  const { activeCart, setActiveCart } = useCart();
   const { categories } = useCategories();
   const { products, loading, error } = useProducts(activeCart);
 

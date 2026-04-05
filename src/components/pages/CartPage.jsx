@@ -1,18 +1,15 @@
 import { useNavigate } from "react-router-dom";
-import { useApp } from "../../context/AppContext";
+import { useAuth } from "../../context/AuthContext";
+import { useCart } from "../../context/CartContext";
+import { useUI } from "../../context/UIContext";
 import EmptyState from "../ui/EmptyState";
 
 const CartPage = () => {
   const navigate = useNavigate();
-  const {
-    sessionCart,
-    removeFromCart,
-    isGuest,
-    openLoginForCheckout,
-    checkout,
-  } = useApp();
+  const { isGuest } = useAuth();
+  const { sessionCart, removeFromCart, checkout } = useCart();
+  const { openLoginForCheckout } = useUI();
 
-  // 購物車商品（從 context 取得完整商品資訊）
   const validProds = sessionCart.filter((p) => p.isPublished);
   const total = validProds.reduce((s, p) => s + p.price, 0);
 

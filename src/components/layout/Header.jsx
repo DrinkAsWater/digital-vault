@@ -1,9 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { useApp } from "../../context/AppContext";
+import { useAuth } from "../../context/AuthContext";
+import { useUI } from "../../context/UIContext";
+import { useCart } from "../../context/CartContext";
 
 const Header = () => {
   const navigate = useNavigate();
-  const { sessionCart, user, openLogin, logout } = useApp();
+  const { openLogin } = useUI();
+  const { user, logout } = useAuth();
+  const { sessionCart } = useCart();
 
   return (
     <header className="dv-header">
@@ -33,7 +37,20 @@ const Header = () => {
               onClick={() => navigate("/profile")}
               title={user.displayName}
             >
-              {user.displayName[0].toUpperCase()}
+              {user.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={user.displayName}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                user.displayName[0].toUpperCase()
+              )}
             </div>
             <button
               className="nav-cart"

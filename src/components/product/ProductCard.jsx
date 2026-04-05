@@ -1,13 +1,18 @@
-import { useApp } from "../../context/AppContext";
+import { useCart } from "../../context/CartContext";
 
 const ProductCard = ({ product, onDetail }) => {
-  const { sessionCart, addToCart } = useApp();
+  const { sessionCart, addToCart } = useCart();
   const inCart = sessionCart.some((p) => p.id === product.id);
 
   return (
     <div className="card">
       <div className="card-img" onClick={() => onDetail(product.id)}>
-        <img src={product.thumbnailUrl} alt={product.name} loading="lazy" />
+        <img
+          src={product.thumbnailUrl}
+          alt={product.name}
+          loading="lazy"
+          decoding="async"
+        />
         <span className="card-cat">{product.categoryName}</span>
       </div>
       <div className="card-body">

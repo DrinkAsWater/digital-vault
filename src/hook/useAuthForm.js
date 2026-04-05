@@ -8,11 +8,11 @@ import {
 import {
   login,
   register,
- apiLogout,
+  apiLogout,
   refreshToken as apiRefresh,
 } from "../utils/ApiFuction";
 
-const useAuth = () => {
+const useAuthForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -103,4 +103,4 @@ const useAuth = () => {
   };
 };
 
-export default useAuth;
+export default useAuthForm;

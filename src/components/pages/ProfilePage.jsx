@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { useApp } from "../../context/AppContext";
+import { useAuth } from "../../context/AuthContext";
+import { useUI } from "../../context/UIContext";
 import { usePurchases } from "../../hook/useProfile";
 import ProfileCard from "../profile/ProfileCard";
 import ProfileStats from "../profile/ProfileStats";
@@ -9,7 +10,8 @@ import PurchaseList from "../profile/PurchaseList";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { user, isGuest, openLogin } = useApp();
+  const { user, isGuest } = useAuth();
+  const { openLogin } = useUI();
   const { purchases } = usePurchases();
 
   if (isGuest())

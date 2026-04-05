@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createOrder, createPayment } from "../utils/ApiFuction";
-import { useApp } from "../context/AppContext";
+import { useCart } from "../context/CartContext";
+import { useUI } from "../context/UIContext";
 
 export const PAYMENT_PROVIDERS = {
   ECPAY: 0,
@@ -10,7 +11,8 @@ export const PAYMENT_PROVIDERS = {
 };
 
 const useCheckout = (onSuccess) => {
-  const { sessionCart, setSessionCart, showToast } = useApp();
+  const { sessionCart, clearCart } = useCart();
+  const { showToast } = useUI();
   const [step, setStep] = useState("select");
   const [selectedProvider, setSelectedProvider] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -30,20 +32,15 @@ const useCheckout = (onSuccess) => {
     setLoading(true);
     setError(null);
     try {
-      // 1. 建立訂單
       const productIds = sessionCart.map((p) => p.id);
       const order = await createOrder(productIds);
-
-      // 2. 付款
       const result = await createPayment(order.id, provider, cardInfo);
 
       if (provider === PAYMENT_PROVIDERS.CVS) {
-        // 超商 → 顯示繳費代碼
         setCvsResult({ ...result, orderId: order.id });
         setStep("cvs-result");
       } else {
-        // 其他付款方式 → 成功
-        setSessionCart([]);
+        clearCart();
         showToast("✅", `付款成功！訂單 ${order.orderNo} 已建立`);
         onSuccess?.();
       }

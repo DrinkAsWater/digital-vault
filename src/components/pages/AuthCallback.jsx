@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useApp } from "../../context/AppContext";
 import { saveAuth } from "../../utils/tokenHelper";
+import { useAuth } from "../../context/AuthContext";
 
 const parseJwt = (token) => {
   try {
@@ -14,7 +14,7 @@ const parseJwt = (token) => {
 
 const AuthCallback = () => {
   const navigate = useNavigate();
-  const { loginAs } = useApp();
+  const { loginAs } = useAuth();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

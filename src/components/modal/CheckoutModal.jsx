@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { useApp } from "../../context/AppContext";
+import { useUI } from "../../context/UIContext";
+import { useCart } from "../../context/CartContext";
 import useCheckout from "../../hook/useCheckout";
 import PaymentMethodList from "../payment/PaymentMethodList";
 import CreditCardForm from "../payment/CreditCardForm";
@@ -13,8 +14,8 @@ const STEP_TITLE = {
 
 const CheckoutModal = () => {
   const navigate = useNavigate();
-  const { checkoutOpen, setCheckoutOpen, pendingOrderId, pay, showToast } =
-    useApp();
+  const { checkoutOpen, setCheckoutOpen, showToast } = useUI();
+  const { pay } = useCart();
 
   const handleSuccess = () => {
     pay(navigate);
@@ -29,7 +30,7 @@ const CheckoutModal = () => {
     selectProvider,
     submitPayment,
     reset,
-  } = useCheckout(pendingOrderId, handleSuccess);
+  } = useCheckout(handleSuccess);
 
   if (!checkoutOpen) return null;
 
@@ -38,21 +39,34 @@ const CheckoutModal = () => {
     setCheckoutOpen(false);
   };
 
+  const titleId = "checkout-modal-title";
+
   return (
     <div
       className="overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
       <div className="modal">
-        <button className="modal-close" onClick={handleClose}>
+        <button
+          className="modal-close"
+          onClick={handleClose}
+          aria-label="關閉付款視窗"
+        >
           ✕
         </button>
-        <div className="modal-logo">DIGITAL VAULT</div>
-        <h3>{STEP_TITLE[step]}</h3>
+        <div className="modal-logo" aria-hidden="true">
+          DIGITAL VAULT
+        </div>
+        <h3 id={titleId}>{STEP_TITLE[step]}</h3>
         <p className="modal-sub">台灣金流 · 安全加密交易</p>
 
         {error && step !== "creditcard" && (
           <div
+            role="alert"
+            aria-live="assertive"
             style={{
               background: "rgba(255,77,109,0.1)",
               border: "1px solid rgba(255,77,109,0.3)",
@@ -71,6 +85,7 @@ const CheckoutModal = () => {
           <>
             <PaymentMethodList onSelect={selectProvider} loading={loading} />
             <div
+              aria-hidden="true"
               style={{
                 textAlign: "center",
                 fontSize: "0.75rem",

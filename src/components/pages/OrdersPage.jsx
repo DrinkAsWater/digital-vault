@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useApp } from "../../context/AppContext";
+import { useAuth } from "../../context/AuthContext";
+import { useUI } from "../../context/UIContext";
 import EmptyState from "../ui/EmptyState";
 import PageStatus from "../ui/PageStatus";
 import { useMyOrders, useCancelOrder, useDownload } from "../../hook/useOrders";
@@ -23,7 +24,8 @@ const getStatusLabel = (status) => {
 
 const OrdersPage = () => {
   const navigate = useNavigate();
-  const { isGuest, openLogin, showToast } = useApp();
+  const { isGuest } = useAuth();
+  const { openLogin, showToast } = useUI();
   const { orders, loading, error, refetch } = useMyOrders();
   const { cancel, loading: cancelling } = useCancelOrder();
   const { downloads, loading: downloading, fetchDownload } = useDownload();
@@ -86,7 +88,6 @@ const OrdersPage = () => {
               📅 {new Date(order.createdAt).toLocaleDateString("zh-TW")}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              {/* 只有未付款才能取消 */}
               {order.status === 0 && (
                 <button
                   className="btn-outline"
@@ -107,7 +108,6 @@ const OrdersPage = () => {
                   取消訂單
                 </button>
               )}
-              {/* 已付款或已完成 → 下載 + 評論 */}
               {(order.status === 1 || order.status === 2) && (
                 <>
                   <button
@@ -136,7 +136,6 @@ const OrdersPage = () => {
         </div>
       ))}
 
-      {/* 下載 Modal */}
       {showDownload && downloads && (
         <DownloadModal
           downloads={downloads}

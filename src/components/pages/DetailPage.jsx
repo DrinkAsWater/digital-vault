@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
-import { useApp } from "../../context/AppContext";
+import { useAuth } from "../../context/AuthContext";
+import { useCart } from "../../context/CartContext";
 import PageStatus from "../ui/PageStatus";
 import { useProductDetail } from "../../hook/useProduct";
 import ReviewSection from "../review/ReviewSection";
@@ -15,10 +16,9 @@ const MOCK_ORDER_ID = "20276BB8-3D41-4BDE-B44E-E2D686A7CDD9";
 
 const DetailPage = () => {
   const { id } = useParams();
-  const { sessionCart, addToCart, isGuest, user, currentUserId } = useApp();
+  const { isGuest, currentUserId } = useAuth();
+  const { sessionCart, addToCart } = useCart();
   const { product, loading, error } = useProductDetail(id);
-  //   console.log('user:', user);  // 加這行
-  // console.log('MOCK_ORDER_ID:', MOCK_ORDER_ID);  // 加這行
 
   if (loading || error) return <PageStatus loading={loading} error={error} />;
   if (!product) return null;

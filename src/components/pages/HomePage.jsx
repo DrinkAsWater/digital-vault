@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import { useApp } from "../../context/AppContext";
+import { useUI } from "../../context/UIContext";
 import ProductCard from "../product/ProductCard";
 import PageStatus from "../ui/PageStatus";
 import { useProducts } from "../../hook/useProduct";
-
 
 const STATS = [
   { num: "200+", label: "數位商品" },
@@ -14,7 +13,7 @@ const STATS = [
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { openLogin } = useApp();
+  const { openLogin } = useUI();
   const { products, loading, error } = useProducts(null);
 
   return (
