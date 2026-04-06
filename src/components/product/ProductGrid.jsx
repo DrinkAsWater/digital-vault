@@ -3,7 +3,7 @@ import EmptyState from "../ui/EmptyState";
 import { useNavigate } from "react-router-dom";
 
 const ProductGrid = ({ products, emptyText = "此分類暫無商品" }) => {
-         console.log(products);
+        //  console.log(products);
   const navigate = useNavigate();
   if (!products.length) return <EmptyState icon="📦" title={emptyText} />;
   return (

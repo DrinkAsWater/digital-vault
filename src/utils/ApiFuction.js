@@ -207,3 +207,38 @@ export const refreshToken = async (refreshToken, oldLoginToken) => {
 export const googleLogin = () => {
   window.location.href = `${BASE_URL}/auth/google`;
 };
+
+export const adminGetAllProducts = async () => {
+  const res = await axios.get(`${BASE_URL}/admin/product`, {
+    headers: getHeader(),
+  });
+  return res.data;
+};
+
+export const adminGetProductById = async (id) => {
+  const res = await axios.get(`${BASE_URL}/admin/product/${id}`, {
+    headers: getHeader(),
+  });
+  return res.data;
+};
+
+export const adminCreateProduct = async (data) => {
+  const res = await axios.post(`${BASE_URL}/admin/product`, data, {
+    headers: getHeader(),
+  });
+  return res.data;
+};
+
+export const adminUpdateProduct = async (id, data) => {
+  const res = await axios.put(`${BASE_URL}/admin/product/${id}`, data, {
+    headers: getHeader(),
+  });
+  return res.data;
+};
+
+export const adminUnpublishProduct = async (id) => {
+  const res = await axios.delete(`${BASE_URL}/admin/product/${id}`, {
+    headers: getHeader(),
+  });
+  return res.data;
+};

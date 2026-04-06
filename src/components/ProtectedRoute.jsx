@@ -25,6 +25,8 @@ export const AdminRoute = ({ children, require = "admin" }) => {
     manager: roles.some((r) => ["admin", "manager"].includes(r)),
     support: roles.some((r) => ["admin", "support"].includes(r)),
   };
+  console.log("AdminRoute - roles:", roles);
+  console.log("AdminRoute - allowed:", allowed);
 
   if (!allowed[require]) return <Navigate to="/" />;
   return children;

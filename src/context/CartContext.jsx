@@ -13,17 +13,27 @@ export function CartProvider({ children }) {
 
   const addToCart = useCallback(
     (product) => {
+      let isDuplicate = false;
+
       setSessionCart((prev) => {
         if (prev.find((p) => p.id === product.id)) {
-          showToast("ℹ️", "已在購物車中");
+          isDuplicate = true;
           return prev;
         }
-        showToast(
-          "🛒",
-          `${product.name} 已加入購物車` + (!user ? "（結帳時需要登入）" : ""),
-        );
         return [...prev, product];
       });
+
+      setTimeout(() => {
+        if (isDuplicate) {
+          showToast("ℹ️", "已在購物車中");
+        } else {
+          showToast(
+            "🛒",
+            `${product.name} 已加入購物車` +
+              (!user ? "（結帳時需要登入）" : ""),
+          );
+        }
+      }, 0);
     },
     [user, showToast],
   );
@@ -49,14 +59,13 @@ export function CartProvider({ children }) {
     }
     try {
       const productIds = sessionCart.map((p) => p.id);
-      const order = await createOrder(productIds);
+      await createOrder(productIds);
       setCheckoutOpen(true);
     } catch (err) {
       showToast("❌", err.response?.data?.message || "建立訂單失敗");
     }
   }, [sessionCart, user, showToast, openLoginForCheckout, setCheckoutOpen]);
 
-  // 付款成功後清空購物車
   const pay = useCallback(
     (navigate) => {
       setSessionCart([]);
