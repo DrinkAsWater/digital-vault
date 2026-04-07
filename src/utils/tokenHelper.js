@@ -1,26 +1,21 @@
-const TOKEN_KEY = "dv_token";
 const USER_KEY = "dv_user";
-const REFRESH_KEY = "dv_refresh";
-//儲存token 和 user
-export const saveAuth = (token, user, refreshToken = null) => {
-  localStorage.setItem(TOKEN_KEY, token);
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
-  if (refreshToken) localStorage.setItem(REFRESH_KEY, refreshToken);
-};
-//取得token
-export const getToken = () => localStorage.getItem(TOKEN_KEY);
-export const getRefreshToken = () => localStorage.getItem(REFRESH_KEY);
 
-//取得user
+// 儲存 user 資訊（Token 改用 HttpOnly Cookie，前端不再存）
+export const saveUser = (user) =>
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
+
+// 取得 user
 export const getUser = () => {
-  const user = localStorage.getItem(USER_KEY);
-  return user ? JSON.parse(user) : null;
+  try {
+    const raw = localStorage.getItem(USER_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
 };
+
 // 清除登入資訊
-export const clearAuth = () => {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
-  localStorage.removeItem(REFRESH_KEY);
-};
-// 是否已登入
-export const isAuthenticated = () => !!getToken();
+export const clearAuth = () => localStorage.removeItem(USER_KEY);
+
+// 是否已登入（改成檢查 user 是否存在）
+export const isAuthenticated = () => !!getUser();

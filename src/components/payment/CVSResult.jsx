@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
-import { getToken } from "../../utils/tokenHelper";
-
-const BASE_URL = import.meta.env.VITE_API_URL || "https://localhost:7124/api";
+import { getPaymentByOrder } from "../../utils/ApiFuction";
 
 const CVSResult = ({ result, onClose, onSuccess }) => {
   const [copied, setCopied] = useState(false);
@@ -46,25 +44,15 @@ const CVSResult = ({ result, onClose, onSuccess }) => {
           return;
         }
 
-        const res = await fetch(`${BASE_URL}/payment/order/${result.orderId}`, {
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!res.ok) return;
-
-        const payments = await res.json();
-        if (!payments.length) return;
+        // 改用 api 實例，自動帶 Cookie
+        const payments = await getPaymentByOrder(result.orderId);
+        if (!payments?.length) return;
 
         const latest = payments[payments.length - 1];
-
-        // PaymentStatus.Paid = 1
         if (latest.status === 1) {
           clearInterval(interval);
           setPaid(true);
-          setTimeout(() => onSuccess?.(), 2000); // 改成呼叫 onSuccess
+          setTimeout(() => onSuccess?.(), 2000);
         }
       } catch (err) {
         console.error("polling error:", err);
@@ -72,7 +60,7 @@ const CVSResult = ({ result, onClose, onSuccess }) => {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [result?.orderId, onClose]);
+  }, [result?.orderId, onSuccess]);
 
   return (
     <div style={{ textAlign: "center", padding: "24px 0" }}>
@@ -89,7 +77,6 @@ const CVSResult = ({ result, onClose, onSuccess }) => {
         超商繳費代碼
       </div>
 
-      {/* 付款成功狀態 */}
       {paid ? (
         <div style={{ padding: "40px 0" }}>
           <div style={{ fontSize: "3rem", marginBottom: "16px" }}>✅</div>

@@ -1,16 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { saveAuth } from "../../utils/tokenHelper";
+import { saveUser } from "../../utils/tokenHelper";
 import { useAuth } from "../../context/AuthContext";
-
-const parseJwt = (token) => {
-  try {
-    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-    return JSON.parse(atob(base64));
-  } catch {
-    return null;
-  }
-};
 
 const AuthCallback = () => {
   const navigate = useNavigate();
@@ -18,32 +9,22 @@ const AuthCallback = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-    const refreshToken = params.get("refreshToken");
+    const displayName = params.get("displayName");
+    const email = params.get("email");
+    const role = params.get("role");
 
-    if (!token) {
+    if (!email) {
       navigate("/");
       return;
     }
 
-    const payload = parseJwt(token);
-    if (!payload) {
-      navigate("/");
-      return;
-    }
-
-    // user 先定義再使用
     const user = {
-      id: payload.sub,
-      email: payload.email,
-      displayName:
-        payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
-      role: payload[
-        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-      ],
+      email,
+      displayName,
+      role,
     };
 
-    saveAuth(token, user, refreshToken); // ← 放在 user 定義之後
+    saveUser(user);
     loginAs(user, "google");
     navigate("/");
   }, [navigate, loginAs]);

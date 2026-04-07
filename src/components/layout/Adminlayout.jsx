@@ -26,7 +26,7 @@ const canAccess = (user, require) => {
 const AdminLayout = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  console.log("AdminLayout user:", user); // ← 加這行
+  // console.log("AdminLayout user:", user); // ← 加這行
   return (
     <div className="admin-layout">
       <aside className="admin-sidebar">

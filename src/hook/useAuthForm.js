@@ -1,16 +1,6 @@
 import { useState } from "react";
-import {
-  clearAuth,
-  saveAuth,
-  getToken,
-  getRefreshToken,
-} from "../utils/tokenHelper";
-import {
-  login,
-  register,
-  apiLogout,
-  refreshToken as apiRefresh,
-} from "../utils/ApiFuction";
+import { saveUser, clearAuth } from "../utils/tokenHelper";
+import { login, register, apiLogout } from "../utils/ApiFuction";
 
 const useAuthForm = () => {
   const [loading, setLoading] = useState(false);
@@ -21,22 +11,15 @@ const useAuthForm = () => {
     setError(null);
     try {
       const data = await login(email, password);
-      saveAuth(
-        data.token,
-        {
-          id: data.id,
-          email: data.email,
-          displayName: data.displayName,
-          role: data.role,
-        },
-        data.refreshToken,
-      );
-      onSuccess({
+      // Token 已存在 HttpOnly Cookie，只需儲存 user 資訊
+      const userData = {
         id: data.id,
         email: data.email,
         displayName: data.displayName,
         role: data.role,
-      });
+      };
+      saveUser(userData);
+      onSuccess(userData);
     } catch (e) {
       setError(e.response?.data?.message || "登入失敗，請確認帳號密碼");
     } finally {
@@ -59,36 +42,12 @@ const useAuthForm = () => {
 
   const handleLogout = async (navigate) => {
     try {
-      const token = getToken();
-      if (token) await apiLogout(token);
+      await apiLogout(); // Cookie 由後端清除
     } catch (e) {
       console.error("登出 API 失敗", e);
     } finally {
-      clearAuth();
+      clearAuth(); // 清 localStorage 的 user
       navigate("/");
-    }
-  };
-
-  const handleRefresh = async () => {
-    try {
-      const oldToken = getToken();
-      const refresh = getRefreshToken();
-      if (!refresh || !oldToken) return null;
-      const data = await apiRefresh(refresh, oldToken);
-      saveAuth(
-        data.token,
-        {
-          id: data.id,
-          email: data.email,
-          displayName: data.displayName,
-          role: data.role,
-        },
-        data.refreshToken,
-      );
-      return data;
-    } catch (e) {
-      clearAuth();
-      return null;
     }
   };
 
@@ -99,7 +58,6 @@ const useAuthForm = () => {
     handleLogin,
     handleRegister,
     handleLogout,
-    handleRefresh,
   };
 };
 

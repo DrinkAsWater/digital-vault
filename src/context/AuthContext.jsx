@@ -1,11 +1,6 @@
 import { createContext, useContext, useState, useCallback } from "react";
-import {
-  clearAuth,
-  getUser,
-  getToken,
-  getRefreshToken,
-} from "../utils/tokenHelper";
-import { apiLogout } from "../utils/ApiFuction"; 
+import { clearAuth, getUser, saveUser } from "../utils/tokenHelper";
+import { apiLogout } from "../utils/ApiFuction";
 import { useUI } from "./UIContext";
 
 const AuthContext = createContext(null);
@@ -26,6 +21,7 @@ export function AuthProvider({ children }) {
   const loginAs = useCallback(
     (userData, provider) => {
       const wasCheckout = loginForCheckout;
+      saveUser(userData);          // 只存 user 資訊，不存 Token
       setUser(userData);
       setAuthProvider(provider);
       closeLogin();
@@ -38,27 +34,19 @@ export function AuthProvider({ children }) {
         }, 400);
       }
     },
-    [
-      loginForCheckout,
-      showToast,
-      closeLogin,
-      setLoginForCheckout,
-      setCheckoutOpen,
-    ],
+    [loginForCheckout, showToast, closeLogin, setLoginForCheckout, setCheckoutOpen],
   );
 
   const logout = useCallback(
     async (navigate) => {
       try {
-        const token = getToken();
-        const refreshToken = getRefreshToken();
-        if (token) await apiLogout(token, refreshToken);
+        await apiLogout();         // Cookie 由後端清除，不需傳 Token
       } catch (e) {
         console.error("登出 API 失敗", e);
       } finally {
         setUser(null);
         setAuthProvider(null);
-        clearAuth();
+        clearAuth();               // 只清 localStorage 的 user
         navigate("/");
         showToast("👋", "已登出");
       }
