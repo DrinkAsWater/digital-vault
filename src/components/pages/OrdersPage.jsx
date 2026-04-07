@@ -7,6 +7,9 @@ import PageStatus from "../ui/PageStatus";
 import { useMyOrders, useCancelOrder, useDownload } from "../../hook/useOrders";
 import OrderReviewModal from "../modal/OrderReviewModal";
 import DownloadModal from "../modal/DownloadModal";
+import CheckoutModal from "../modal/CheckoutModal";
+import { getPaymentByOrder } from "../../utils/ApiFuction";
+import CVSResult from "../payment/CVSResult";
 
 const STATUS_CLASS = {
   0: "status-unpaid",
@@ -31,6 +34,30 @@ const OrdersPage = () => {
   const { downloads, loading: downloading, fetchDownload } = useDownload();
   const [reviewingOrder, setReviewingOrder] = useState(null);
   const [showDownload, setShowDownload] = useState(false);
+  const [payingOrder, setPayingOrder] = useState(null);
+  const [cvsPayment, setCvsPayment] = useState(null);
+  const [checkingPayment, setCheckingPayment] = useState(null);
+
+  const handleCheckPayment = async (order) => {
+    setCheckingPayment(order.id);
+    try {
+      const payments = await getPaymentByOrder(order.id);
+      const latest = payments?.[payments.length - 1];
+
+      // 有超商付款記錄 → 顯示繳費代碼
+      if (latest?.provider === "CVS" && latest?.status === 0) {
+        setCvsPayment({ ...latest, orderId: order.id });
+      } else {
+        // 其他 → 開付款 Modal
+        setPayingOrder(order);
+      }
+    } catch {
+      // 沒有付款記錄 → 直接開付款 Modal
+      setPayingOrder(order);
+    } finally {
+      setCheckingPayment(null);
+    }
+  };
 
   if (isGuest())
     return (
@@ -88,26 +115,39 @@ const OrdersPage = () => {
               📅 {new Date(order.createdAt).toLocaleDateString("zh-TW")}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              {/* 未付款 → 查看付款 + 取消 */}
               {order.status === 0 && (
-                <button
-                  className="btn-outline"
-                  style={{
-                    padding: "6px 14px",
-                    fontSize: "0.8rem",
-                    color: "var(--danger)",
-                    borderColor: "var(--danger)",
-                  }}
-                  disabled={cancelling}
-                  onClick={() =>
-                    cancel(order.id, () => {
-                      showToast("✅", "訂單已取消");
-                      refetch();
-                    })
-                  }
-                >
-                  取消訂單
-                </button>
+                <>
+                  <button
+                    className="btn-cart"
+                    style={{ whiteSpace: "nowrap" }}
+                    disabled={checkingPayment === order.id}
+                    onClick={() => handleCheckPayment(order)}
+                  >
+                    {checkingPayment === order.id ? "查詢中..." : "💳 查看付款"}
+                  </button>
+                  <button
+                    className="btn-outline"
+                    style={{
+                      padding: "6px 14px",
+                      fontSize: "0.8rem",
+                      color: "var(--danger)",
+                      borderColor: "var(--danger)",
+                    }}
+                    disabled={cancelling}
+                    onClick={() =>
+                      cancel(order.id, () => {
+                        showToast("✅", "訂單已取消");
+                        refetch();
+                      })
+                    }
+                  >
+                    取消訂單
+                  </button>
+                </>
               )}
+
+              {/* 已付款或已完成 → 下載 + 評論 */}
               {(order.status === 1 || order.status === 2) && (
                 <>
                   <button
@@ -130,12 +170,14 @@ const OrdersPage = () => {
                   </button>
                 </>
               )}
+
               <div className="order-total">${order.totalAmount}</div>
             </div>
           </div>
         </div>
       ))}
 
+      {/* 下載 Modal */}
       {showDownload && downloads && (
         <DownloadModal
           downloads={downloads}
@@ -143,6 +185,7 @@ const OrdersPage = () => {
         />
       )}
 
+      {/* 評論 Modal */}
       {reviewingOrder && (
         <OrderReviewModal
           order={reviewingOrder}
@@ -152,6 +195,45 @@ const OrdersPage = () => {
             setReviewingOrder(null);
           }}
         />
+      )}
+
+      {/* 繼續付款 Modal */}
+      {payingOrder && (
+        <CheckoutModal
+          existingOrderId={payingOrder.id}
+          onClose={() => {
+            setPayingOrder(null);
+            refetch();
+          }}
+        />
+      )}
+
+      {/* 超商繳費代碼 Modal */}
+      {cvsPayment && (
+        <div className="overlay" onClick={() => setCvsPayment(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setCvsPayment(null)}>
+              ✕
+            </button>
+            <div className="modal-logo" aria-hidden="true">
+              DIGITAL VAULT
+            </div>
+            <h3>超商繳費</h3>
+            <p className="modal-sub">台灣金流 · 安全加密交易</p>
+            <CVSResult
+              result={cvsPayment}
+              onClose={() => {
+                setCvsPayment(null);
+                refetch();
+              }}
+              onSuccess={() => {
+                setCvsPayment(null);
+                showToast("✅", "付款成功！");
+                refetch();
+              }}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

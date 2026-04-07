@@ -12,13 +12,20 @@ const STEP_TITLE = {
   "cvs-result": "超商繳費",
 };
 
-const CheckoutModal = () => {
+const CheckoutModal = ({ existingOrderId = null, onClose }) => {
   const navigate = useNavigate();
   const { checkoutOpen, setCheckoutOpen, showToast } = useUI();
   const { pay } = useCart();
 
+  // 從訂單頁開啟時用 onClose，從購物車開啟時用 setCheckoutOpen
+  const isOpen = existingOrderId ? true : checkoutOpen;
+
   const handleSuccess = () => {
-    pay(navigate);
+    if (existingOrderId) {
+      onClose?.();
+    } else {
+      pay(navigate);
+    }
     showToast("✅", "付款成功！");
   };
 
@@ -30,13 +37,17 @@ const CheckoutModal = () => {
     selectProvider,
     submitPayment,
     reset,
-  } = useCheckout(handleSuccess);
+  } = useCheckout(handleSuccess, existingOrderId);
 
-  if (!checkoutOpen) return null;
+  if (!isOpen) return null;
 
   const handleClose = () => {
     reset();
-    setCheckoutOpen(false);
+    if (existingOrderId) {
+      onClose?.();
+    } else {
+      setCheckoutOpen(false);
+    }
   };
 
   const titleId = "checkout-modal-title";

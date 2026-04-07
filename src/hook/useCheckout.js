@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { createOrder, createPayment } from "../utils/ApiFuction";
+import {
+  createOrder,
+  createPayment,
+  getPaymentByOrder,
+} from "../utils/ApiFuction";
 import { useCart } from "../context/CartContext";
 import { useUI } from "../context/UIContext";
 
@@ -10,7 +14,7 @@ export const PAYMENT_PROVIDERS = {
   CVS: 3,
 };
 
-const useCheckout = (onSuccess) => {
+const useCheckout = (onSuccess, existingOrderId = null) => {
   const { sessionCart, clearCart } = useCart();
   const { showToast } = useUI();
   const [step, setStep] = useState("select");
@@ -32,16 +36,28 @@ const useCheckout = (onSuccess) => {
     setLoading(true);
     setError(null);
     try {
-      const productIds = sessionCart.map((p) => p.id);
-      const order = await createOrder(productIds);
-      const result = await createPayment(order.id, provider, cardInfo);
+      // 有既有訂單就不建立新訂單
+      let orderId = existingOrderId;
+      let orderNo = null;
+
+      if (!orderId) {
+        const productIds = sessionCart.map((p) => p.id);
+        const order = await createOrder(productIds);
+        orderId = order.id;
+        orderNo = order.orderNo;
+      }
+
+      const result = await createPayment(orderId, provider, cardInfo);
 
       if (provider === PAYMENT_PROVIDERS.CVS) {
-        setCvsResult({ ...result, orderId: order.id });
+        setCvsResult({ ...result, orderId });
         setStep("cvs-result");
       } else {
-        clearCart();
-        showToast("✅", `付款成功！訂單 ${order.orderNo} 已建立`);
+        if (!existingOrderId) clearCart();
+        showToast(
+          "✅",
+          orderNo ? `付款成功！訂單 ${orderNo} 已建立` : "付款成功！",
+        );
         onSuccess?.();
       }
     } catch (err) {
