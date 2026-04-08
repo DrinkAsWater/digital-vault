@@ -1,9 +1,9 @@
 import axios from "axios";
 import { saveUser, clearAuth } from "./tokenHelper";
+import { emitUserRefreshed } from "./authEvents";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "https://localhost:7124/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5173/api";
 
-// ── Axios 實例，全域帶 withCredentials ──
 const api = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
@@ -47,12 +47,14 @@ api.interceptors.response.use(
 
       try {
         const res = await api.post("/auth/refresh");
-        saveUser({
+        const userData = {
           id: res.data.id,
           email: res.data.email,
           displayName: res.data.displayName,
           role: res.data.role,
-        });
+        };
+        saveUser(userData);
+        emitUserRefreshed(userData); // ← 通知 AuthContext 更新
         processQueue(null);
         return api(originalRequest);
       } catch (refreshError) {
