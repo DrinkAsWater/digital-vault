@@ -5,7 +5,7 @@ const BASE_URL = import.meta.env.VITE_API_URL || "https://localhost:7124/api";
 // ── Axios 實例，全域帶 withCredentials ──
 const api = axios.create({
   baseURL: BASE_URL,
-  withCredentials: true,           // 每個請求自動帶 Cookie
+  withCredentials: true, // 每個請求自動帶 Cookie
   headers: {
     "Content-Type": "application/json",
   },
@@ -13,7 +13,11 @@ const api = axios.create({
 
 // ── Auth ──
 export const register = async (email, displayName, password) => {
-  const res = await api.post("/auth/register", { email, displayName, password });
+  const res = await api.post("/auth/register", {
+    email,
+    displayName,
+    password,
+  });
   return res.data;
 };
 
@@ -113,7 +117,12 @@ export const getMyReviews = async () => {
 };
 
 export const createReview = async (productId, orderId, rating, comment) => {
-  const res = await api.post("/review", { productId, orderId, rating, comment });
+  const res = await api.post("/review", {
+    productId,
+    orderId,
+    rating,
+    comment,
+  });
   return res.data;
 };
 
@@ -166,5 +175,31 @@ export const adminUpdateProduct = async (id, data) => {
 
 export const adminUnpublishProduct = async (id) => {
   const res = await api.delete(`/admin/product/${id}`);
+  return res.data;
+};
+
+// ── Admin Category ──
+export const adminGetAllCategories = async () => {
+  const res = await api.get("/admin/category");
+  return res.data;
+};
+
+export const adminGetCategoryById = async (id) => {
+  const res = await api.get(`/admin/category/${id}`);
+  return res.data;
+};
+
+export const adminCreateCategory = async (data) => {
+  const res = await api.post("/admin/category", data);
+  return res.data;
+};
+
+export const adminUpdateCategory = async (id, data) => {
+  const res = await api.put(`/admin/category/${id}`, data);
+  return res.data;
+};
+
+export const adminDeleteCategory = async (id) => {
+  const res = await api.delete(`/admin/category/${id}`);
   return res.data;
 };

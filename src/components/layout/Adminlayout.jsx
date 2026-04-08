@@ -5,11 +5,12 @@ const MENU_ITEMS = [
   { section: "主選單" },
   { path: "/admin", label: "總覽", icon: "◈", exact: true, require: "manager" },
   { path: "/admin/products", label: "商品管理", icon: "▦", require: "manager" },
+  { path: "/admin/categories", label: "分類管理", icon: "⊞", require: "manager" },  
   { path: "/admin/orders", label: "訂單管理", icon: "≡", require: "support" },
   { section: "系統" },
   { path: "/admin/users", label: "用戶管理", icon: "◉", require: "admin" },
   { path: "/admin/reviews", label: "評論管理", icon: "◎", require: "support" },
-];
+]
 
 const canAccess = (user, require) => {
   if (!user?.role) return false;
@@ -26,7 +27,6 @@ const canAccess = (user, require) => {
 const AdminLayout = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  // console.log("AdminLayout user:", user); // ← 加這行
   return (
     <div className="admin-layout">
       <aside className="admin-sidebar">

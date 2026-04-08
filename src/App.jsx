@@ -28,6 +28,9 @@ const AdminUserPage = lazy(() => import("./components/pages/AdminUserPage"));
 const AdminReviewPage = lazy(
   () => import("./components/pages/AdminReviewPage"),
 );
+const AdminCategoryPage = lazy(
+  () => import("./components/pages/AdminCategoryPage"),
+);
 
 const App = () => {
   return (
@@ -79,6 +82,7 @@ const App = () => {
                     <Route index element={<AdminPage />} />
                     <Route path="products" element={<AdminProductPage />} />
                     <Route path="orders" element={<AdminOrderPage />} />
+                    <Route path="categories" element={<AdminCategoryPage />} />
                     <Route path="users" element={<AdminUserPage />} />
                     <Route path="reviews" element={<AdminReviewPage />} />
                   </Route>
