@@ -1,104 +1,96 @@
-import EmptyState from "../ui/EmptyState";
-import PageStatus from "../ui/PageStatus";
+import { useState } from 'react'
+import PageStatus from '../ui/PageStatus'
+import EmptyState from '../ui/EmptyState'
+import { useAdminUsers } from '../../hook/useAdminUsers'
 
+const ROLE_OPTIONS = ['user', 'manager', 'support', 'admin']
 
 const AdminUserPage = () => {
-  const users = [];
-  const loading = false;
-  const error = null;
+  const { users, loading, error, deactivate, activate, updateRole } = useAdminUsers()
+  const [updatingId, setUpdatingId] = useState(null)
 
-  if (loading || error) return <PageStatus loading={loading} error={error} />;
+  if (loading || error) return <PageStatus loading={loading} error={error} />
+
+  const handleRoleChange = async (id, role) => {
+    setUpdatingId(id)
+    await updateRole(id, role)
+    setUpdatingId(null)
+  }
+
+  const handleToggleActive = async (user) => {
+    setUpdatingId(user.id)
+    if (user.isActive) {
+      await deactivate(user.id)
+    } else {
+      await activate(user.id)
+    }
+    setUpdatingId(null)
+  }
 
   return (
-    <div style={{ padding: "60px", maxWidth: "1000px", margin: "0 auto" }}>
-      <div className="page-title" style={{ padding: "0 0 32px 0" }}>
-        用戶管理 <span>Users</span>
+    <div className="admin-page">
+      <div className="admin-page-header">
+        <div>
+          <div className="admin-page-title">用戶管理 <span>Users</span></div>
+          <div className="admin-page-sub">共 {users.length} 位用戶</div>
+        </div>
       </div>
 
       {users.length === 0 ? (
-        <EmptyState icon="👥" title="尚無用戶資料">
-          <p
-            style={{
-              marginTop: "8px",
-              fontSize: "0.85rem",
-              color: "var(--muted)",
-            }}
-          >
-            等待後端 API 串接完成
-          </p>
-        </EmptyState>
+        <EmptyState icon="◉" title="尚無用戶" />
       ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table className="admin-table">
           <thead>
-            <tr
-              style={{
-                borderBottom: "1px solid var(--border)",
-                fontSize: "0.82rem",
-                color: "var(--muted)",
-              }}
-            >
-              <th style={{ padding: "12px", textAlign: "left" }}>顯示名稱</th>
-              <th style={{ padding: "12px", textAlign: "left" }}>Email</th>
-              <th style={{ padding: "12px", textAlign: "left" }}>角色</th>
-              <th style={{ padding: "12px", textAlign: "left" }}>狀態</th>
-              <th style={{ padding: "12px", textAlign: "left" }}>操作</th>
+            <tr>
+              <th>用戶</th>
+              <th>登入方式</th>
+              <th>角色</th>
+              <th>狀態</th>
+              <th>註冊時間</th>
+              <th>操作</th>
             </tr>
           </thead>
           <tbody>
-            {users.map((u) => (
-              <tr
-                key={u.id}
-                style={{ borderBottom: "1px solid var(--border)" }}
-              >
-                <td style={{ padding: "14px 12px", fontSize: "0.88rem" }}>
-                  {u.displayName}
+            {users.map(user => (
+              <tr key={user.id}>
+                <td>
+                  <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>{user.displayName}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>{user.email}</div>
                 </td>
-                <td
-                  style={{
-                    padding: "14px 12px",
-                    fontSize: "0.85rem",
-                    color: "var(--muted)",
-                  }}
-                >
-                  {u.email}
-                </td>
-                <td style={{ padding: "14px 12px" }}>
-                  <span
-                    style={{
-                      padding: "3px 10px",
-                      borderRadius: "20px",
-                      fontSize: "0.75rem",
-                      background: "var(--cyan-dim)",
-                      color: "var(--cyan)",
-                      border: "1px solid rgba(0,247,255,0.3)",
-                    }}
-                  >
-                    {u.role}
+                <td>
+                  <span className="badge badge-role">
+                    {user.provider === 'Google' ? '🔵 Google' : '📧 Email'}
                   </span>
                 </td>
-                <td style={{ padding: "14px 12px" }}>
-                  <span
-                    style={{
-                      padding: "3px 10px",
-                      borderRadius: "20px",
-                      fontSize: "0.75rem",
-                      background: u.isActive
-                        ? "rgba(0,229,160,0.12)"
-                        : "rgba(255,77,109,0.12)",
-                      color: u.isActive ? "var(--green)" : "var(--danger)",
-                      border: `1px solid ${u.isActive ? "rgba(0,229,160,0.3)" : "rgba(255,77,109,0.3)"}`,
-                    }}
+                <td>
+                  <select
+                    className="admin-form-select"
+                    style={{ padding: '6px 10px', fontSize: '0.78rem', width: 'auto' }}
+                    value={user.role}
+                    disabled={updatingId === user.id}
+                    onChange={e => handleRoleChange(user.id, e.target.value)}
                   >
-                    {u.isActive ? "啟用" : "停用"}
+                    {ROLE_OPTIONS.map(r => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </select>
+                </td>
+                <td>
+                  <span className={`badge ${user.isActive ? 'badge-active' : 'badge-inactive'}`}>
+                    {user.isActive ? '啟用' : '停用'}
                   </span>
                 </td>
-                <td style={{ padding: "14px 12px" }}>
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <button className="btn-edit">編輯角色</button>
-                    <button className="btn-delete">
-                      {u.isActive ? "停用" : "啟用"}
-                    </button>
-                  </div>
+                <td style={{ color: 'var(--muted)', fontSize: '0.78rem' }}>
+                  {new Date(user.createdAt).toLocaleDateString('zh-TW')}
+                </td>
+                <td>
+                  <button
+                    className={user.isActive ? 'btn-delete' : 'btn-edit'}
+                    disabled={updatingId === user.id}
+                    onClick={() => handleToggleActive(user)}
+                  >
+                    {updatingId === user.id ? '處理中...' : user.isActive ? '停用' : '啟用'}
+                  </button>
                 </td>
               </tr>
             ))}
@@ -106,7 +98,7 @@ const AdminUserPage = () => {
         </table>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default AdminUserPage;
+export default AdminUserPage

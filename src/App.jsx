@@ -31,6 +31,7 @@ const AdminReviewPage = lazy(
 const AdminCategoryPage = lazy(
   () => import("./components/pages/AdminCategoryPage"),
 );
+const AdminPaymentPage = lazy(() => import("./components/pages/AdminPaymentPage"));
 
 const App = () => {
   return (
@@ -85,6 +86,7 @@ const App = () => {
                     <Route path="categories" element={<AdminCategoryPage />} />
                     <Route path="users" element={<AdminUserPage />} />
                     <Route path="reviews" element={<AdminReviewPage />} />
+                    <Route path="payments" element={<AdminPaymentPage />} />
                   </Route>
                 </Routes>
               </Suspense>

@@ -207,3 +207,40 @@ export const adminUpdateOrderStatus = async (id, status) => {
   const res = await api.put(`/admin/order/${id}/status`, { status });
   return res.data;
 };
+
+// ── Admin User ──
+export const adminGetAllUsers = async () => {
+  const res = await api.get("/admin/user");
+  return res.data;
+};
+
+export const adminGetUserById = async (id) => {
+  const res = await api.get(`/admin/user/${id}`);
+  return res.data;
+};
+
+export const adminDeactivateUser = async (id) => {
+  const res = await api.put(`/admin/user/${id}/deactivate`);
+  return res.data;
+};
+
+export const adminActivateUser = async (id) => {
+  const res = await api.put(`/admin/user/${id}/activate`);
+  return res.data;
+};
+
+export const adminUpdateUserRole = async (id, role) => {
+  const res = await api.put(`/admin/user/${id}/role`, { role });
+  return res.data;
+};
+
+// ── Admin Payment ──
+export const adminGetAllPayments = async () => {
+  const res = await api.get("/admin/payment");
+  return res.data;
+};
+
+export const adminVoidPayment = async (id, reason) => {
+  const res = await api.put(`/admin/payment/${id}/void`, { reason });
+  return res.data;
+};
