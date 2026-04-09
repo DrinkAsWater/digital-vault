@@ -44,7 +44,8 @@ const AdminUserPage = () => {
             <tr>
               <th>用戶</th>
               <th>登入方式</th>
-              <th>角色</th>
+              <th>目前角色</th>
+              <th>變更角色</th>
               <th>狀態</th>
               <th>註冊時間</th>
               <th>操作</th>
@@ -63,13 +64,26 @@ const AdminUserPage = () => {
                   </span>
                 </td>
                 <td>
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                    {user.roles?.length > 0
+                      ? user.roles.map(r => (
+                        <span key={r} className="badge badge-role">{r}</span>
+                      ))
+                      : <span className="badge badge-inactive">無角色</span>
+                    }
+                  </div>
+                </td>
+                <td>
                   <select
                     className="admin-form-select"
                     style={{ padding: '6px 10px', fontSize: '0.78rem', width: 'auto' }}
-                    value={user.role}
+                    defaultValue=""
                     disabled={updatingId === user.id}
-                    onChange={e => handleRoleChange(user.id, e.target.value)}
+                    onChange={e => {
+                      if (e.target.value) handleRoleChange(user.id, e.target.value)
+                    }}
                   >
+                    <option value="" disabled>選擇角色</option>
                     {ROLE_OPTIONS.map(r => (
                       <option key={r} value={r}>{r}</option>
                     ))}
