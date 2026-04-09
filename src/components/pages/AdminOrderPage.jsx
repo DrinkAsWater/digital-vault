@@ -1,69 +1,113 @@
-import EmptyState from "../ui/EmptyState";
-import PageStatus from "../ui/PageStatus";
+import { useState } from 'react'
+import PageStatus from '../ui/PageStatus'
+import EmptyState from '../ui/EmptyState'
+import { useAdminOrders } from '../../hook/useAdminOrders'
 
-const STATUS_CLASS = {
-  0: "status-unpaid",
-  1: "status-paid",
-  2: "status-completed",
-};
+const STATUS_OPTIONS = [
+  { value: 0, label: '未付款' },
+  { value: 1, label: '已付款' },
+  { value: 2, label: '已完成' },
+  { value: 3, label: '已取消' },
+]
 
-const getStatusLabel = (status) => {
-  if (status === 0) return "未付款";
-  if (status === 1) return "已付款";
-  if (status === 2) return "已完成";
-  return "已取消";
-};
+const STATUS_BADGE = {
+  0: 'badge-pending',
+  1: 'badge-paid',
+  2: 'badge-completed',
+  3: 'badge-inactive',
+}
+
+const getStatusLabel = (status) =>
+  STATUS_OPTIONS.find(s => s.value === status)?.label ?? '未知'
 
 const AdminOrderPage = () => {
-  const orders = [];
-  const loading = false;
-  const error = null;
+  const { orders, loading, error, updateStatus } = useAdminOrders()
+  const [updatingId, setUpdatingId] = useState(null)
 
-  if (loading || error) return <PageStatus loading={loading} error={error} />;
+  if (loading || error) return <PageStatus loading={loading} error={error} />
+
+  const handleStatusChange = async (id, status) => {
+    setUpdatingId(id)
+    await updateStatus(id, parseInt(status))
+    setUpdatingId(null)
+  }
 
   return (
-    <div style={{ padding: "60px", maxWidth: "1000px", margin: "0 auto" }}>
-      <div className="page-title" style={{ padding: "0 0 32px 0" }}>
-        訂單管理 <span>Orders</span>
+    <div className="admin-page">
+      <div className="admin-page-header">
+        <div>
+          <div className="admin-page-title">訂單管理 <span>Orders</span></div>
+          <div className="admin-page-sub">共 {orders.length} 筆訂單</div>
+        </div>
       </div>
 
       {orders.length === 0 ? (
-        <EmptyState icon="📋" title="尚無訂單資料">
-          <p
-            style={{
-              marginTop: "8px",
-              fontSize: "0.85rem",
-              color: "var(--muted)",
-            }}
-          >
-            等待後端 API 串接完成
-          </p>
-        </EmptyState>
+        <EmptyState icon="≡" title="尚無訂單" />
       ) : (
-        orders.map((order) => (
-          <div key={order.id} className="order-card">
-            <div className="order-header">
-              <div className="order-no">訂單 {order.orderNo}</div>
-              <div className={`order-status ${STATUS_CLASS[order.status]}`}>
-                {getStatusLabel(order.status)}
-              </div>
-            </div>
-            <div className="order-footer">
-              <div className="order-date">
-                {new Date(order.createdAt).toLocaleDateString("zh-TW")}
-              </div>
-              <div
-                style={{ display: "flex", gap: "8px", alignItems: "center" }}
-              >
-                <button className="btn-edit">查看詳情</button>
-                <div className="order-total">${order.totalAmount}</div>
-              </div>
-            </div>
-          </div>
-        ))
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>訂單編號</th>
+              <th>用戶</th>
+              <th>商品</th>
+              <th>金額</th>
+              <th>狀態</th>
+              <th>建立時間</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.map(order => (
+              <tr key={order.id}>
+                <td>
+                  <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: '0.82rem' }}>
+                    {order.orderNo}
+                  </span>
+                </td>
+                <td>
+                  <div style={{ fontSize: '0.85rem' }}>{order.userDisplayName}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>{order.userEmail}</div>
+                </td>
+                <td>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                    {order.items?.map(item => (
+                      <span key={item.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '2px 8px', fontSize: '0.75rem', color: 'var(--muted)' }}>
+                        {item.productName}
+                      </span>
+                    ))}
+                  </div>
+                </td>
+                <td style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, color: 'var(--cyan)' }}>
+                  ${order.totalAmount}
+                </td>
+                <td>
+                  <span className={`badge ${STATUS_BADGE[order.status]}`}>
+                    {getStatusLabel(order.status)}
+                  </span>
+                </td>
+                <td style={{ color: 'var(--muted)', fontSize: '0.78rem' }}>
+                  {new Date(order.createdAt).toLocaleDateString('zh-TW')}
+                </td>
+                <td>
+                  <select
+                    className="admin-form-select"
+                    style={{ padding: '6px 10px', fontSize: '0.78rem', width: 'auto' }}
+                    value={order.status}
+                    disabled={updatingId === order.id}
+                    onChange={e => handleStatusChange(order.id, e.target.value)}
+                  >
+                    {STATUS_OPTIONS.map(s => (
+                      <option key={s.value} value={s.value}>{s.label}</option>
+                    ))}
+                  </select>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default AdminOrderPage;
+export default AdminOrderPage

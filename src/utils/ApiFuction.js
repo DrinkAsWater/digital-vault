@@ -191,3 +191,19 @@ export const adminDeleteCategory = async (id) => {
   const res = await api.delete(`/admin/category/${id}`);
   return res.data;
 };
+
+// ── Admin Order ──
+export const adminGetAllOrders = async () => {
+  const res = await api.get("/admin/order");
+  return res.data;
+};
+
+export const adminGetOrderById = async (id) => {
+  const res = await api.get(`/admin/order/${id}`);
+  return res.data;
+};
+
+export const adminUpdateOrderStatus = async (id, status) => {
+  const res = await api.put(`/admin/order/${id}/status`, { status });
+  return res.data;
+};
