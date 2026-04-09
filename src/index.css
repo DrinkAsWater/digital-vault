@@ -350,14 +350,15 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;}
 
 /* ── ADMIN TABLE ── */
 .admin-table{width:100%;border-collapse:collapse;}
-.admin-table th{padding:12px;text-align:left;font-size:11px;color:#3d5a7a;font-weight:600;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.5px;}
-.admin-table td{padding:14px 12px;font-size:13px;border-bottom:1px solid var(--border);}
+.admin-table th{padding:10px 12px;text-align:left;font-size:11px;color:#3d5a7a;font-weight:600;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.5px;}
+.admin-table td{padding:14px 12px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle;}
 .admin-table tr:last-child td{border-bottom:none;}
 .admin-table tbody tr{transition:.15s;}
 .admin-table tbody tr:hover td{background:rgba(255,255,255,0.02);}
 .admin-table-actions{display:flex;gap:8px;}
 .product-thumb{width:36px;height:28px;border-radius:5px;object-fit:cover;}
 .product-name-cell{display:flex;align-items:center;gap:10px;}
+
 
 /* ── ADMIN FORM ── */
 .admin-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
