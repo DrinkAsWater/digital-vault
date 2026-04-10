@@ -230,7 +230,7 @@ export const adminActivateUser = async (id) => {
 };
 
 export const adminUpdateUserRole = async (id, role) => {
-  const res = await api.put(`/admin/user/${id}/role`, { role });
+  const res = await api.put(`/admin/user/${id}/role`, { roleCode:role });
   return res.data;
 };
 
