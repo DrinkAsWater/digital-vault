@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Stars } from "../ui/Stars";
 import ReviewForm from "./ReviewForm";
+import { getAvatarUrl } from "../../utils/avatarHelper";
 
 const ReviewCard = ({
   review,
@@ -12,20 +13,29 @@ const ReviewCard = ({
   const [editing, setEditing] = useState(false);
   const isOwner = currentUserId && review.userId === currentUserId;
 
- 
-
-  // 修正：改成接收物件 { rating, comment }
   const handleUpdate = async ({ rating, comment }) => {
     const success = await onUpdate(review.id, rating, comment);
     if (success) setEditing(false);
   };
 
+  const avatarUrl = getAvatarUrl(review.userAvatarUrl);
+
   return (
     <div className="review-card">
       <div className="review-header">
-        <div className="reviewer-avatar">
-          {review.userDisplayName?.[0] ?? "?"}
-        </div>
+        {/* 頭像 */}
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt={review.userDisplayName}
+            className="reviewer-avatar"
+            style={{ objectFit: "cover" }}
+          />
+        ) : (
+          <div className="reviewer-avatar">
+            {review.userDisplayName?.[0] ?? "?"}
+          </div>
+        )}
         <div>
           <div className="reviewer-name">{review.userDisplayName}</div>
           <Stars rating={review.rating} size="0.7rem" />

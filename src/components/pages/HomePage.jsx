@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useUI } from "../../context/UIContext";
+import { useAuth } from "../../context/AuthContext";
 import ProductCard from "../product/ProductCard";
 import PageStatus from "../ui/PageStatus";
 import { useProducts } from "../../hook/useProduct";
@@ -14,6 +15,7 @@ const STATS = [
 const HomePage = () => {
   const navigate = useNavigate();
   const { openLogin } = useUI();
+  const { isGuest } = useAuth();
   const { products, loading, error } = useProducts(null);
 
   return (
@@ -37,9 +39,11 @@ const HomePage = () => {
             <button className="btn-primary" onClick={() => navigate("/store")}>
               瀏覽商店
             </button>
-            <button className="btn-outline" onClick={openLogin}>
-              登入帳號
-            </button>
+            {isGuest() && (
+              <button className="btn-outline" onClick={openLogin}>
+                登入帳號
+              </button>
+            )}
           </div>
         </div>
       </section>

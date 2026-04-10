@@ -12,11 +12,17 @@ const ReviewSection = ({ productId, currentUserId, userOrderId }) => {
   // 判斷目前使用者是否已評論過
   const myReview = reviews.find((r) => r.userId === currentUserId);
   const canReview = currentUserId && userOrderId && !myReview;
+  console.log("currentUserId:", currentUserId);
+  console.log("userOrderId:", userOrderId);
+  console.log("myReview:", myReview);
+  console.log("canReview:", canReview);
 
   // 計算平均評分
   const avgRating =
     reviews.length > 0
-      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+      ? (
+          reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        ).toFixed(1)
       : null;
 
   if (loading) return <div className="empty-state">載入評論中...</div>;
@@ -26,11 +32,15 @@ const ReviewSection = ({ productId, currentUserId, userOrderId }) => {
     <div className="reviews-section">
       <div className="section-title" style={{ marginBottom: "20px" }}>
         用戶評論{" "}
-        <span style={{ color: "var(--cyan)" }}>
-          ({reviews.length})
-        </span>
+        <span style={{ color: "var(--cyan)" }}>({reviews.length})</span>
         {avgRating && (
-          <span style={{ fontSize: "0.9rem", marginLeft: "12px", color: "var(--muted)" }}>
+          <span
+            style={{
+              fontSize: "0.9rem",
+              marginLeft: "12px",
+              color: "var(--muted)",
+            }}
+          >
             平均 ⭐ {avgRating}
           </span>
         )}
@@ -40,9 +50,7 @@ const ReviewSection = ({ productId, currentUserId, userOrderId }) => {
       {canReview && (
         <div className="review-form-wrapper">
           <div className="review-form-title">撰寫評論</div>
-          {actionError && (
-            <div className="review-error">{actionError}</div>
-          )}
+          {actionError && <div className="review-error">{actionError}</div>}
           <ReviewForm
             productId={productId}
             orderId={userOrderId}

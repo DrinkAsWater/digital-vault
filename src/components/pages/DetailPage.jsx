@@ -20,6 +20,10 @@ const DetailPage = () => {
   const { product, loading, error } = useProductDetail(id);
   const { orderId } = useOrderIdByProduct(isGuest() ? null : id);
 
+  console.log("productId:", id);
+  console.log("orderId:", orderId);
+  console.log("isGuest:", isGuest());
+
   if (loading || error) return <PageStatus loading={loading} error={error} />;
   if (!product) return null;
 
