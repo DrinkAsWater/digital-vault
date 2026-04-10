@@ -3,6 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import PageStatus from "../ui/PageStatus";
 import { useProductDetail } from "../../hook/useProduct";
+import { useOrderIdByProduct } from "../../hook/useOrders";
 import ReviewSection from "../review/ReviewSection";
 
 const INCLUDES = [
@@ -12,13 +13,12 @@ const INCLUDES = [
   "30 天退款保障",
 ];
 
-const MOCK_ORDER_ID = "20276BB8-3D41-4BDE-B44E-E2D686A7CDD9";
-
 const DetailPage = () => {
   const { id } = useParams();
   const { isGuest, currentUserId } = useAuth();
   const { sessionCart, addToCart } = useCart();
   const { product, loading, error } = useProductDetail(id);
+  const { orderId } = useOrderIdByProduct(isGuest() ? null : id);
 
   if (loading || error) return <PageStatus loading={loading} error={error} />;
   if (!product) return null;
@@ -55,7 +55,7 @@ const DetailPage = () => {
           <div style={{ fontSize: "0.78rem", color: "var(--muted)" }}>
             {isGuest()
               ? "🔒 結帳時需要登入，加入購物車無需帳號"
-              : "付款後狀態：Orders.Status = Paid → Completed"}
+              : "付款後即可下載並留下評論"}
           </div>
         </div>
       </div>
@@ -63,7 +63,7 @@ const DetailPage = () => {
       <ReviewSection
         productId={product.id}
         currentUserId={currentUserId}
-        userOrderId={isGuest() ? null : MOCK_ORDER_ID}
+        userOrderId={isGuest() ? null : orderId}
       />
     </>
   );

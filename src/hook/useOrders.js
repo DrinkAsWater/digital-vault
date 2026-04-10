@@ -102,3 +102,31 @@ export const useCancelOrder = () => {
 
   return { loading, error, cancel };
 };
+
+// 從訂單列表找出包含指定商品的訂單 ID
+export const useOrderIdByProduct = (productId) => {
+  const [orderId, setOrderId] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!productId) {
+      setLoading(false);
+      return;
+    }
+
+    getMyOrders()
+      .then((orders) => {
+        // 找出包含這個商品、且已付款或已完成的訂單
+        const matched = orders.find(
+          (order) =>
+            (order.status === 1 || order.status === 2) &&
+            order.items?.some((item) => item.productId === productId),
+        );
+        setOrderId(matched?.id ?? null);
+      })
+      .catch(() => setOrderId(null))
+      .finally(() => setLoading(false));
+  }, [productId]);
+
+  return { orderId, loading };
+};
