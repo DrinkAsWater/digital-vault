@@ -25,7 +25,7 @@ export const refreshToken = async () => {
 };
 
 export const googleLogin = () => {
-  window.location.href = `${BASE_URL}/auth/google`;
+  window.location.href = `${api.defaults.baseURL}/auth/google`;
 };
 
 // ── Category ──
@@ -230,7 +230,7 @@ export const adminActivateUser = async (id) => {
 };
 
 export const adminUpdateUserRole = async (id, role) => {
-  const res = await api.put(`/admin/user/${id}/role`, { roleCode:role });
+  const res = await api.put(`/admin/user/${id}/role`, { roleCode: role });
   return res.data;
 };
 
