@@ -140,6 +140,16 @@ export const updatePassword = async (currentPassword, newPassword) => {
   return res.data;
 };
 
+// ── Avatar ──
+export const uploadAvatar = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await api.put("/user/avatar", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+};
+
 // ── Admin Product ──
 export const adminGetAllProducts = async () => {
   const res = await api.get("/admin/product");

@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useUI } from "../../context/UIContext";
 import { useCart } from "../../context/CartContext";
+import { getAvatarUrl } from "../../utils/avatarHelper";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -39,17 +40,19 @@ const Header = () => {
             >
               {user.avatarUrl ? (
                 <img
-                  src={user.avatarUrl}
+                  src={getAvatarUrl(user.avatarUrl)}
                   alt={user.displayName}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                  }}
+                  className="nav-avatar"
+                  style={{ objectFit: "cover" }}
+                  onClick={() => navigate("/profile")}
                 />
               ) : (
-                user.displayName[0].toUpperCase()
+                <div
+                  className="nav-avatar"
+                  onClick={() => navigate("/profile")}
+                >
+                  {user.displayName?.[0]?.toUpperCase()}
+                </div>
               )}
             </div>
             <button
