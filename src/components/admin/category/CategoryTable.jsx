@@ -3,28 +3,75 @@ const CategoryTable = ({ categories, onEdit, onDelete }) => {
     <table className="admin-table">
       <thead>
         <tr>
-          <th>分類名稱</th>
-          <th>描述</th>
-          <th>商品數量</th>
-          <th>建立時間</th>
-          <th>操作</th>
+          <th>分類</th>
+          <th style={{ textAlign: "right" }}>商品數</th>
+          <th style={{ textAlign: "right" }}>排序</th>
+          <th style={{ textAlign: "center" }}>狀態</th>
+          <th style={{ textAlign: "center" }}>操作</th>
         </tr>
       </thead>
       <tbody>
         {categories.map((c) => (
           <tr key={c.id}>
-            <td style={{ fontWeight: 600, color: "var(--text)" }}>{c.name}</td>
-            <td style={{ color: "var(--muted)", fontSize: "0.82rem" }}>
-              {c.description || "—"}
-            </td>
-            <td style={{ color: "var(--cyan)", fontWeight: 700 }}>
-              {c.productCount ?? 0}
-            </td>
-            <td style={{ color: "var(--muted)", fontSize: "0.78rem" }}>
-              {new Date(c.createdAt).toLocaleDateString("zh-TW")}
-            </td>
             <td>
-              <div className="admin-table-actions">
+              <div
+                style={{
+                  fontWeight: 600,
+                  fontSize: "0.9rem",
+                  color: "var(--text)",
+                }}
+              >
+                {c.name}
+              </div>
+              <div
+                style={{
+                  fontSize: "0.75rem",
+                  color: "var(--muted)",
+                  marginTop: "3px",
+                }}
+              >
+                /{c.slug}
+              </div>
+            </td>
+            <td style={{ textAlign: "right" }}>
+              <span
+                style={{
+                  fontFamily: "'Syne', sans-serif",
+                  fontWeight: 700,
+                  fontSize: "1rem",
+                  color: "var(--cyan)",
+                }}
+              >
+                {c.productCount ?? 0}
+              </span>
+            </td>
+            <td style={{ textAlign: "right" }}>
+              <span
+                style={{
+                  fontFamily: "'Syne', sans-serif",
+                  fontWeight: 600,
+                  fontSize: "0.9rem",
+                  color: "var(--muted)",
+                }}
+              >
+                {c.sortOrder}
+              </span>
+            </td>
+            <td style={{ textAlign: "center" }}>
+              <span
+                className={`badge ${c.isVisible ? "badge-active" : "badge-inactive"}`}
+              >
+                {c.isVisible ? "顯示" : "隱藏"}
+              </span>
+            </td>
+            <td style={{ textAlign: "center" }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "8px",
+                  justifyContent: "center",
+                }}
+              >
                 <button className="btn-edit" onClick={() => onEdit(c)}>
                   編輯
                 </button>

@@ -1,124 +1,137 @@
-import { useState } from 'react'
-import PageStatus from '../ui/PageStatus'
-import EmptyState from '../ui/EmptyState'
-import { useAdminUsers } from '../../hook/useAdminUsers'
+import { useState } from "react";
+import PageStatus from "../ui/PageStatus";
+import EmptyState from "../ui/EmptyState";
+import VoidPaymentModal from "../admin/payment/VoidPaymentModal";
+import PaymentAction from "../admin/payment/PaymentAction";
+import { useAdminPayments } from "../../hook/useAdminPayments";
+import VoidDetailModal from "../admin/payment/VoidDetailModal";
 
-const ROLE_OPTIONS = ['user', 'manager', 'support', 'admin']
+const PROVIDER_LABEL = {
+  ECPay: "ECPay",
+  LinePay: "LinePay",
+  CreditCard: "信用卡",
+  CVS: "超商",
+};
 
-const AdminUserPage = () => {
-    const { users, loading, error, deactivate, activate, updateRole } = useAdminUsers()
-    const [updatingId, setUpdatingId] = useState(null)
+const AdminPaymentPage = () => {
+  const { payments, loading, error, voidPayment } = useAdminPayments();
+  const [voidingId, setVoidingId] = useState(null);
+  const [selectedPayment, setSelectedPayment] = useState(null);
+  const [viewingVoid, setViewingVoid] = useState(null);
 
-    if (loading || error) return <PageStatus loading={loading} error={error} />
+  if (loading || error) return <PageStatus loading={loading} error={error} />;
 
-    const handleRoleChange = async (id, role) => {
-        setUpdatingId(id)
-        await updateRole(id, role)
-        setUpdatingId(null)
-    }
+  const handleVoidConfirm = async (reason) => {
+    setVoidingId(selectedPayment.id);
+    await voidPayment(selectedPayment.id, reason);
+    setVoidingId(null);
+    setSelectedPayment(null);
+  };
 
-    const handleToggleActive = async (user) => {
-        setUpdatingId(user.id)
-        if (user.isActive) {
-            await deactivate(user.id)
-        } else {
-            await activate(user.id)
-        }
-        setUpdatingId(null)
-    }
-
-    const getProviderLabel = (provider) => {
-        if (provider === 'Google') return '🔵 Google'
-        if (provider === 'Local') return '📧 Email'
-        return provider
-    }
-
-    return (
-        <div className="admin-page">
-            <div className="admin-page-header">
-                <div>
-                    <div className="admin-page-title">用戶管理 <span>Users</span></div>
-                    <div className="admin-page-sub">共 {users.length} 位用戶</div>
-                </div>
-            </div>
-
-            {users.length === 0 ? (
-                <EmptyState icon="◉" title="尚無用戶" />
-            ) : (
-                <table className="admin-table">
-                    <thead>
-                        <tr>
-                            <th>用戶</th>
-                            <th>登入方式</th>
-                            <th>目前角色</th>
-                            <th>變更角色</th>
-                            <th>狀態</th>
-                            <th>註冊時間</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {users.map(user => (
-                            <tr key={user.id}>
-                                <td>
-                                    <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>{user.displayName}</div>
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>{user.email}</div>
-                                </td>
-                                <td>
-                                    <span className="badge badge-role">
-                                        {getProviderLabel(user.provider)}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                                        {user.roles?.length > 0
-                                            ? user.roles.map(r => (
-                                                <span key={r} className="badge badge-role">{r}</span>
-                                            ))
-                                            : <span className="badge badge-inactive">無角色</span>
-                                        }
-                                    </div>
-                                </td>
-                                <td>
-                                    <select
-                                        className="admin-form-select"
-                                        style={{ padding: '6px 10px', fontSize: '0.78rem', width: 'auto' }}
-                                        defaultValue=""
-                                        disabled={updatingId === user.id}
-                                        onChange={e => {
-                                            if (e.target.value) handleRoleChange(user.id, e.target.value)
-                                        }}
-                                    >
-                                        <option value="" disabled>選擇角色</option>
-                                        {ROLE_OPTIONS.map(r => (
-                                            <option key={r} value={r}>{r}</option>
-                                        ))}
-                                    </select>
-                                </td>
-                                <td>
-                                    <span className={`badge ${user.isActive ? 'badge-active' : 'badge-inactive'}`}>
-                                        {user.isActive ? '啟用' : '停用'}
-                                    </span>
-                                </td>
-                                <td style={{ color: 'var(--muted)', fontSize: '0.78rem' }}>
-                                    {new Date(user.createdAt).toLocaleDateString('zh-TW')}
-                                </td>
-                                <td>
-                                    <button
-                                        className={user.isActive ? 'btn-delete' : 'btn-edit'}
-                                        disabled={updatingId === user.id}
-                                        onClick={() => handleToggleActive(user)}
-                                    >
-                                        {updatingId === user.id ? '處理中...' : user.isActive ? '停用' : '啟用'}
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
+  return (
+    <div className="admin-page">
+      <div className="admin-page-header">
+        <div>
+          <div className="admin-page-title">
+            付款管理 <span>Payments</span>
+          </div>
+          <div className="admin-page-sub">共 {payments.length} 筆付款記錄</div>
         </div>
-    )
-}
+      </div>
 
-export default AdminUserPage
+      {payments.length === 0 ? (
+        <EmptyState icon="💳" title="尚無付款記錄" />
+      ) : (
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>訂單編號</th>
+              <th>用戶</th>
+              <th>付款方式</th>
+              <th style={{ textAlign: "right" }}>金額</th>
+              <th>付款時間</th>
+              <th style={{ textAlign: "center" }}>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {payments.map((payment) => (
+              <tr key={payment.id}>
+                <td>
+                  <span
+                    style={{
+                      fontFamily: "'Syne', sans-serif",
+                      fontWeight: 700,
+                      fontSize: "0.82rem",
+                    }}
+                  >
+                    {payment.orderNo}
+                  </span>
+                </td>
+                <td>
+                  <div style={{ fontSize: "0.85rem", fontWeight: 500 }}>
+                    {payment.userDisplayName}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "0.75rem",
+                      color: "var(--muted)",
+                      marginTop: "2px",
+                    }}
+                  >
+                    {payment.userEmail}
+                  </div>
+                </td>
+                <td>
+                  <span className="badge badge-role">
+                    {PROVIDER_LABEL[payment.provider] ?? payment.provider}
+                  </span>
+                </td>
+                <td style={{ textAlign: "right" }}>
+                  <span
+                    style={{
+                      fontFamily: "'Syne', sans-serif",
+                      fontWeight: 700,
+                      color: "var(--cyan)",
+                    }}
+                  >
+                    ${payment.amount}
+                  </span>
+                </td>
+                <td style={{ color: "var(--muted)", fontSize: "0.78rem" }}>
+                  {payment.paidAt
+                    ? new Date(payment.paidAt).toLocaleDateString("zh-TW")
+                    : "—"}
+                </td>
+                <td style={{ textAlign: "center" }}>
+                  <PaymentAction
+                    payment={payment}
+                    voidingId={voidingId}
+                    onVoid={setSelectedPayment}
+                    onViewVoid={setViewingVoid}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {selectedPayment && (
+        <VoidPaymentModal
+          payment={selectedPayment}
+          onConfirm={handleVoidConfirm}
+          onClose={() => setSelectedPayment(null)}
+          loading={voidingId === selectedPayment.id}
+        />
+      )}
+      {viewingVoid && ( // ← 新增
+        <VoidDetailModal
+          payment={viewingVoid}
+          onClose={() => setViewingVoid(null)}
+        />
+      )}
+    </div>
+  );
+};
+
+export default AdminPaymentPage;
