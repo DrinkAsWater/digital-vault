@@ -1,11 +1,8 @@
 import { useState } from "react";
-import {
-  createOrder,
-  createPayment,
-  getPaymentByOrder,
-} from "../utils/ApiFuction";
+import { checkout } from "../utils/ApiFuction";
 import { useCart } from "../context/CartContext";
 import { useUI } from "../context/UIContext";
+
 
 export const PAYMENT_PROVIDERS = {
   ECPAY: 0,
@@ -36,32 +33,36 @@ const useCheckout = (onSuccess, existingOrderId = null) => {
     setLoading(true);
     setError(null);
     try {
-      // 有既有訂單就不建立新訂單
-      let orderId = existingOrderId;
-      let orderNo = null;
+      const productIds = sessionCart.map((p) => p.id);
 
-      if (!orderId) {
-        const productIds = sessionCart.map((p) => p.id);
-        const order = await createOrder(productIds);
-        orderId = order.id;
-        orderNo = order.orderNo;
-      }
+      const payload = {
+        productIds,
+        provider,
+        ...cardInfo,
+      };
 
-      const result = await createPayment(orderId, provider, cardInfo);
+      const result = await checkout(payload);
 
       if (provider === PAYMENT_PROVIDERS.CVS) {
-        setCvsResult({ ...result, orderId });
+        // 超商 → 顯示繳費代碼
+        clearCart();
+        setCvsResult({ ...result, orderId: result.orderId });
         setStep("cvs-result");
       } else {
-        if (!existingOrderId) clearCart();
-        showToast(
-          "✅",
-          orderNo ? `付款成功！訂單 ${orderNo} 已建立` : "付款成功！",
-        );
+        // 其他 → 付款成功
+        clearCart();
+        showToast("✅", `付款成功！訂單 ${result.orderNo} 已建立`);
         onSuccess?.();
       }
     } catch (err) {
-      setError(err.response?.data?.message || "付款失敗，請稍後再試");
+      const status = err.response?.status;
+      if (status === 402) {
+        setError("付款失敗，請確認卡片資訊");
+      } else if (status === 404) {
+        setError("找不到商品，請重新整理");
+      } else {
+        setError(err.response?.data?.message || "付款失敗，請稍後再試");
+      }
     } finally {
       setLoading(false);
     }

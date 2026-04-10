@@ -87,6 +87,11 @@ export const confirmCVSPayment = async (paymentId) => {
   const res = await api.put(`/payment/${paymentId}/cvs-confirm`, {});
   return res.data;
 };
+// ── Checkout（新流程）──
+export const checkout = async (data) => {
+  const res = await api.post("/payment/checkout", data);
+  return res.data;
+};
 
 // ── Review ──
 export const getReviewsByProduct = async (productId) => {

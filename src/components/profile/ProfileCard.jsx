@@ -19,7 +19,8 @@ const ProfileCard = ({ user }) => {
         <div className="profile-name">{user.displayName}</div>
         <div className="profile-email">{user.email}</div>
         <div className="provider-badge">
-          {user.provider === 'Google' ? '🔵 Google 登入' : '🔑 Email 登入'} · {user.role}
+          {user.provider === "Google" ? "🔵 Google 登入" : "🔑 Email 登入"} ·{" "}
+          {user.role}
         </div>
       </div>
     </div>

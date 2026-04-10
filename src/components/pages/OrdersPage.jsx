@@ -7,7 +7,6 @@ import PageStatus from "../ui/PageStatus";
 import { useMyOrders, useCancelOrder, useDownload } from "../../hook/useOrders";
 import OrderReviewModal from "../modal/OrderReviewModal";
 import DownloadModal from "../modal/DownloadModal";
-import CheckoutModal from "../modal/CheckoutModal";
 import { getPaymentByOrder } from "../../utils/ApiFuction";
 import CVSResult from "../payment/CVSResult";
 
@@ -34,7 +33,6 @@ const OrdersPage = () => {
   const { downloads, loading: downloading, fetchDownload } = useDownload();
   const [reviewingOrder, setReviewingOrder] = useState(null);
   const [showDownload, setShowDownload] = useState(false);
-  const [payingOrder, setPayingOrder] = useState(null);
   const [cvsPayment, setCvsPayment] = useState(null);
   const [checkingPayment, setCheckingPayment] = useState(null);
 
@@ -44,16 +42,13 @@ const OrdersPage = () => {
       const payments = await getPaymentByOrder(order.id);
       const latest = payments?.[payments.length - 1];
 
-      // 有超商付款記錄 → 顯示繳費代碼
-      if (latest?.provider === "CVS" && latest?.status === 0) {
+      if (latest) {
         setCvsPayment({ ...latest, orderId: order.id });
       } else {
-        // 其他 → 開付款 Modal
-        setPayingOrder(order);
+        showToast("❌", "找不到付款記錄");
       }
     } catch {
-      // 沒有付款記錄 → 直接開付款 Modal
-      setPayingOrder(order);
+      showToast("❌", "查詢付款資訊失敗");
     } finally {
       setCheckingPayment(null);
     }
@@ -115,7 +110,7 @@ const OrdersPage = () => {
               📅 {new Date(order.createdAt).toLocaleDateString("zh-TW")}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              {/* 未付款 → 查看付款 + 取消 */}
+              {/* 未付款 → 查看繳費代碼 + 取消 */}
               {order.status === 0 && (
                 <>
                   <button
@@ -124,7 +119,9 @@ const OrdersPage = () => {
                     disabled={checkingPayment === order.id}
                     onClick={() => handleCheckPayment(order)}
                   >
-                    {checkingPayment === order.id ? "查詢中..." : "💳 查看付款"}
+                    {checkingPayment === order.id
+                      ? "查詢中..."
+                      : "🏪 查看繳費代碼"}
                   </button>
                   <button
                     className="btn-outline"
@@ -193,17 +190,6 @@ const OrdersPage = () => {
           onSuccess={() => {
             showToast("✅", "評論已送出！");
             setReviewingOrder(null);
-          }}
-        />
-      )}
-
-      {/* 繼續付款 Modal */}
-      {payingOrder && (
-        <CheckoutModal
-          existingOrderId={payingOrder.id}
-          onClose={() => {
-            setPayingOrder(null);
-            refetch();
           }}
         />
       )}

@@ -22,6 +22,7 @@ const AuthCallback = () => {
       email,
       displayName,
       role,
+      avatarUrl: params.get("avatarUrl"),
     };
 
     saveUser(user);

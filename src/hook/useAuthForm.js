@@ -17,6 +17,7 @@ const useAuthForm = () => {
         email: data.email,
         displayName: data.displayName,
         role: data.role,
+        avatarUrl: data.avatarUrl ?? null,
       };
       saveUser(userData);
       onSuccess(userData);
