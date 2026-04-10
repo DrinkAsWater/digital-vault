@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useAdminStats } from "../../hook/useAdminStats";
+import PageStatus from "../ui/PageStatus";
 
 const MENU_ITEMS = [
   {
@@ -10,10 +12,24 @@ const MENU_ITEMS = [
     require: "manager",
   },
   {
+    path: "/admin/categories",
+    icon: "⊞",
+    title: "分類管理",
+    desc: "管理商品分類",
+    require: "manager",
+  },
+  {
     path: "/admin/orders",
     icon: "≡",
     title: "訂單管理",
     desc: "查看、處理所有訂單",
+    require: "support",
+  },
+  {
+    path: "/admin/payments",
+    icon: "💳",
+    title: "付款管理",
+    desc: "查看、作廢付款記錄",
     require: "support",
   },
   {
@@ -43,6 +59,13 @@ const canAccess = (user, require) => {
   return false;
 };
 
+const STATUS_BADGE = {
+  待付款: "badge-pending",
+  已付款: "badge-paid",
+  已完成: "badge-completed",
+  已取消: "badge-inactive",
+};
+
 const today = new Date().toLocaleDateString("zh-TW", {
   year: "numeric",
   month: "2-digit",
@@ -52,6 +75,7 @@ const today = new Date().toLocaleDateString("zh-TW", {
 const AdminPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { stats, loading } = useAdminStats();
   const accessible = MENU_ITEMS.filter((m) => canAccess(user, m.require));
 
   return (
@@ -74,27 +98,43 @@ const AdminPage = () => {
         </button>
       </div>
 
-      {/* 統計卡 - 等後端 API 完成後串接真實數據 */}
+      {/* 統計卡 */}
       <div className="admin-stat-grid">
         <div className="admin-stat-card accent">
           <div className="admin-stat-label">總訂單數</div>
-          <div className="admin-stat-value">—</div>
-          <div className="admin-stat-delta up">等待串接</div>
+          <div className="admin-stat-value">
+            {loading ? "—" : (stats?.totalOrders ?? "—")}
+          </div>
+          <div className="admin-stat-delta up">所有訂單</div>
         </div>
         <div className="admin-stat-card">
           <div className="admin-stat-label">本月營收</div>
-          <div className="admin-stat-value">—</div>
-          <div className="admin-stat-delta up">等待串接</div>
+          <div className="admin-stat-value">
+            {loading
+              ? "—"
+              : stats
+                ? `$${stats.monthlyRevenue.toLocaleString()}`
+                : "—"}
+          </div>
+          <div className="admin-stat-delta up">已付款 + 已完成</div>
         </div>
         <div className="admin-stat-card">
           <div className="admin-stat-label">總用戶數</div>
-          <div className="admin-stat-value">—</div>
-          <div className="admin-stat-delta up">等待串接</div>
+          <div className="admin-stat-value">
+            {loading ? "—" : (stats?.totalUsers ?? "—")}
+          </div>
+          <div className="admin-stat-delta up">所有用戶</div>
         </div>
         <div className="admin-stat-card">
           <div className="admin-stat-label">待處理訂單</div>
-          <div className="admin-stat-value">—</div>
-          <div className="admin-stat-delta down">等待串接</div>
+          <div className="admin-stat-value">
+            {loading ? "—" : (stats?.pendingOrders ?? "—")}
+          </div>
+          <div
+            className={`admin-stat-delta ${stats?.pendingOrders > 0 ? "down" : "up"}`}
+          >
+            {stats?.pendingOrders > 0 ? "需要處理" : "全部處理完畢"}
+          </div>
         </div>
       </div>
 
@@ -117,7 +157,7 @@ const AdminPage = () => {
         ))}
       </div>
 
-      {/* 最近訂單 - 等後端 API 完成後串接 */}
+      {/* 最近訂單 */}
       <div className="admin-section-header">
         <div className="admin-section-title" style={{ margin: 0, flex: 1 }}>
           最近訂單
@@ -130,16 +170,44 @@ const AdminPage = () => {
         </span>
       </div>
       <div className="admin-order-list" style={{ marginTop: "14px" }}>
-        <div
-          style={{
-            textAlign: "center",
-            padding: "40px",
-            color: "var(--muted)",
-            fontSize: "0.85rem",
-          }}
-        >
-          等待後端 Admin API 串接完成
-        </div>
+        {loading ? (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "40px",
+              color: "var(--muted)",
+              fontSize: "0.85rem",
+            }}
+          >
+            載入中...
+          </div>
+        ) : stats?.recentOrders?.length > 0 ? (
+          stats.recentOrders.map((order) => (
+            <div key={order.id} className="admin-order-row">
+              <div>
+                <div className="admin-order-no">{order.orderNo}</div>
+                <div className="admin-order-user">{order.userDisplayName}</div>
+              </div>
+              <span
+                className={`badge ${STATUS_BADGE[order.statusName] ?? "badge-pending"}`}
+              >
+                {order.statusName}
+              </span>
+              <div className="admin-order-amount">${order.totalAmount}</div>
+            </div>
+          ))
+        ) : (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "40px",
+              color: "var(--muted)",
+              fontSize: "0.85rem",
+            }}
+          >
+            尚無訂單記錄
+          </div>
+        )}
       </div>
     </div>
   );

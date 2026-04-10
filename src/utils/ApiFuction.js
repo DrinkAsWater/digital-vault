@@ -244,3 +244,18 @@ export const adminVoidPayment = async (id, reason) => {
   const res = await api.put(`/admin/payment/${id}/void`, { reason });
   return res.data;
 };
+// ── Admin Review ──
+export const adminGetAllReviews = async () => {
+  const res = await api.get("/admin/review");
+  return res.data;
+};
+
+export const adminDeleteReview = async (id) => {
+  const res = await api.delete(`/admin/review/${id}`);
+  return res.data;
+};
+// ── Admin Stats ──
+export const adminGetStats = async () => {
+  const res = await api.get("/admin/stats");
+  return res.data;
+};
