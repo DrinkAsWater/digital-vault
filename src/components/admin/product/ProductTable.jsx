@@ -1,4 +1,4 @@
-const ProductTable = ({ products, onEdit, onUnpublish }) => {
+const ProductTable = ({ products, onEdit, onUnpublish, onPublish }) => {
   return (
     <table className="admin-table">
       <thead>
@@ -45,12 +45,16 @@ const ProductTable = ({ products, onEdit, onUnpublish }) => {
                 <button className="btn-edit" onClick={() => onEdit(p)}>
                   編輯
                 </button>
-                {p.isPublished && (
+                {p.isPublished ? (
                   <button
                     className="btn-delete"
                     onClick={() => onUnpublish(p.id)}
                   >
                     下架
+                  </button>
+                ) : (
+                  <button className="btn-cart" onClick={() => onPublish(p.id)}>
+                    上架
                   </button>
                 )}
               </div>

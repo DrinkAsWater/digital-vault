@@ -9,6 +9,7 @@ import OrderReviewModal from "../modal/OrderReviewModal";
 import DownloadModal from "../modal/DownloadModal";
 import { getPaymentByOrder } from "../../utils/ApiFuction";
 import CVSResult from "../payment/CVSResult";
+import SkeletonOrderCard from "../ui/SkeletonOrderCard";
 
 const STATUS_CLASS = {
   0: "status-unpaid",
@@ -67,8 +68,15 @@ const OrdersPage = () => {
       </div>
     );
 
-  if (loading || error) return <PageStatus loading={loading} error={error} />;
-
+  if (error) return <PageStatus error={error} />;
+  if (loading)
+    return (
+      <div className="orders-page">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <SkeletonOrderCard key={i} />
+        ))}
+      </div>
+    );
   if (!orders.length)
     return (
       <div className="orders-page">

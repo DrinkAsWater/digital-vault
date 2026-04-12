@@ -1,14 +1,28 @@
+import { useState, useCallback } from "react";
 import { useCart } from "../../context/CartContext";
 import { useCategories, useProducts } from "../../hook/useProduct";
 import ProductGrid from "../product/ProductGrid";
-import PageStatus from "../ui/PageStatus";
+import SkeletonGrid from "../ui/SkeletonGrid";
+import ProductSearch from "../admin/product/ProductSearch";
 
 const StorePage = () => {
   const { activeCart, setActiveCart } = useCart();
   const { categories } = useCategories();
-  const { products, loading, error } = useProducts(activeCart);
+  const [keyword, setKeyword] = useState("");
+  const [sortBy, setSortBy] = useState("");
 
-  if (loading || error) return <PageStatus loading={loading} error={error} />;
+  const [sortField, sortOrder] = sortBy ? sortBy.split("_") : [null, null];
+
+  const handleSearch = useCallback((value) => {
+    setKeyword(value);
+  }, []);
+
+  const { products, loading, error } = useProducts({
+    categoryId: activeCart,
+    keyword: keyword || null,
+    sortBy: sortField,
+    sortOrder: sortOrder,
+  });
 
   return (
     <>
@@ -26,7 +40,26 @@ const StorePage = () => {
           </button>
         ))}
       </div>
-      <ProductGrid products={products} />
+      <ProductSearch
+        onSearch={handleSearch}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+      />
+      {error ? (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "40px",
+            color: "var(--danger)",
+          }}
+        >
+          載入失敗，請重新整理
+        </div>
+      ) : loading ? (
+        <SkeletonGrid count={8} />
+      ) : (
+        <ProductGrid products={products} />
+      )}
     </>
   );
 };

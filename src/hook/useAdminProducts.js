@@ -1,60 +1,86 @@
-import { useCallback, useEffect, useState } from "react"
-import { adminCreateProduct, adminGetAllProducts, adminUnpublishProduct, adminUpdateProduct } from "../utils/ApiFuction"
-import { useUI } from "../context/UIContext"
-
+import { useCallback, useEffect, useState } from "react";
+import {
+  adminCreateProduct,
+  adminGetAllProducts,
+  adminUnpublishProduct,
+  adminUpdateProduct,
+  adminPublishProduct, // ← 新增
+} from "../utils/ApiFuction";
+import { useUI } from "../context/UIContext";
 
 export const useAdminProducts = () => {
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const { showToast } = useUI()
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const { showToast } = useUI();
 
   const fetchProducts = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const data = await adminGetAllProducts()
-      setProducts(data)
+      const data = await adminGetAllProducts();
+      setProducts(data);
     } catch (err) {
-      setError(err.response?.data?.message || '取得商品失敗')
+      setError(err.response?.data?.message || "取得商品失敗");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [])
+  }, []);
 
-  useEffect(() => { fetchProducts() }, [fetchProducts])
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const createProduct = async (data, onSuccess) => {
     try {
-      await adminCreateProduct(data)
-      showToast('✅', '商品已新增')
-      fetchProducts()
-      onSuccess?.()
+      await adminCreateProduct(data);
+      showToast("✅", "商品已新增");
+      fetchProducts();
+      onSuccess?.();
     } catch (err) {
-      showToast('❌', err.response?.data?.message || '新增失敗')
+      showToast("❌", err.response?.data?.message || "新增失敗");
     }
-  }
+  };
 
   const updateProduct = async (id, data, onSuccess) => {
     try {
-      await adminUpdateProduct(id, data)
-      showToast('✅', '商品已更新')
-      fetchProducts()
-      onSuccess?.()
+      await adminUpdateProduct(id, data);
+      showToast("✅", "商品已更新");
+      fetchProducts();
+      onSuccess?.();
     } catch (err) {
-      showToast('❌', err.response?.data?.message || '更新失敗')
+      showToast("❌", err.response?.data?.message || "更新失敗");
     }
-  }
+  };
 
   const unpublishProduct = async (id) => {
     try {
-      await adminUnpublishProduct(id)
-      showToast('✅', '商品已下架')
-      fetchProducts()
+      await adminUnpublishProduct(id);
+      showToast("✅", "商品已下架");
+      fetchProducts();
     } catch (err) {
-      showToast('❌', err.response?.data?.message || '下架失敗')
+      showToast("❌", err.response?.data?.message || "下架失敗");
     }
-  }
+  };
 
-  return { products, loading, error, createProduct, updateProduct, unpublishProduct, refetch: fetchProducts }
-}
+  const publishProduct = async (id) => {
+    try {
+      await adminPublishProduct(id);
+      showToast("✅", "商品已上架");
+      fetchProducts();
+    } catch (err) {
+      showToast("❌", err.response?.data?.message || "上架失敗");
+    }
+  };
+
+  return {
+    products,
+    loading,
+    error,
+    createProduct,
+    updateProduct,
+    unpublishProduct,
+    publishProduct, 
+    refetch: fetchProducts,
+  };
+};

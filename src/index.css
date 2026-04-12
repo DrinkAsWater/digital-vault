@@ -384,6 +384,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;}
 @keyframes errorGlow{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
 @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-3px);}40%{transform:translateX(3px);}60%{transform:translateX(-2px);}80%{transform:translateX(2px);}}
 @keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
 
 /* ── RESPONSIVE 手機 ── */
 @media(max-width:768px){

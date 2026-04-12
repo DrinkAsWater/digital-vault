@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import ProductCard from "../product/ProductCard";
 import PageStatus from "../ui/PageStatus";
 import { useProducts } from "../../hook/useProduct";
+import SkeletonGrid from "../ui/SkeletonGrid";
 
 const STATS = [
   { num: "200+", label: "數位商品" },
@@ -16,7 +17,7 @@ const HomePage = () => {
   const navigate = useNavigate();
   const { openLogin } = useUI();
   const { isGuest } = useAuth();
-  const { products, loading, error } = useProducts(null);
+  const { products, loading, error } = useProducts({});
 
   return (
     <>
@@ -71,8 +72,10 @@ const HomePage = () => {
           </button>
         </div>
         <div className="products" style={{ padding: 0 }}>
-          {loading || error ? (
-            <PageStatus loading={loading} error={error} />
+          {error ? (
+            <PageStatus error={error} />
+          ) : loading ? (
+            <SkeletonGrid count={4} />
           ) : (
             products
               .slice(0, 4)

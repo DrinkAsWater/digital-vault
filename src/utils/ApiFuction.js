@@ -34,10 +34,16 @@ export const getCategories = async () => {
   return res.data;
 };
 
-// ── Product ──
-export const getProducts = async (categoryId = null) => {
-  const url = categoryId ? `/product?categoryId=${categoryId}` : "/product";
-  const res = await api.get(url);
+// 商品搜尋（更新現有的 getProducts）
+export const getProducts = async (params = {}) => {
+  const query = new URLSearchParams();
+  if (params.categoryId) query.append("categoryId", params.categoryId);
+  if (params.keyword) query.append("keyword", params.keyword);
+  if (params.minPrice) query.append("minPrice", params.minPrice);
+  if (params.maxPrice) query.append("maxPrice", params.maxPrice);
+  if (params.sortBy) query.append("sortBy", params.sortBy);
+  if (params.sortOrder) query.append("sortOrder", params.sortOrder);
+  const res = await api.get(`/product?${query.toString()}`);
   return res.data;
 };
 
@@ -178,6 +184,11 @@ export const adminUpdateProduct = async (id, data) => {
 
 export const adminUnpublishProduct = async (id) => {
   const res = await api.delete(`/admin/product/${id}`);
+  return res.data;
+};
+// 商品重新上架
+export const adminPublishProduct = async (id) => {
+  const res = await api.put(`/admin/product/${id}/publish`);
   return res.data;
 };
 

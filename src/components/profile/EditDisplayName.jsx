@@ -18,25 +18,9 @@ const EditDisplayName = ({ user }) => {
   };
 
   return (
-    <div
-      style={{
-        background: "var(--card)",
-        border: "1px solid var(--border)",
-        borderRadius: "14px",
-        padding: "24px",
-        marginBottom: "16px",
-      }}
-    >
-      <div
-        style={{
-          fontFamily: "'Syne', sans-serif",
-          fontWeight: 700,
-          marginBottom: "16px",
-          color: "var(--cyan)",
-        }}
-      >
-        修改顯示名稱
-      </div>
+    <div className="profile-info-card">
+      <div className="profile-info-title">修改顯示名稱</div>
+
       {error && (
         <div
           style={{
@@ -52,6 +36,7 @@ const EditDisplayName = ({ user }) => {
           {error}
         </div>
       )}
+
       {success && (
         <div
           style={{
@@ -63,21 +48,24 @@ const EditDisplayName = ({ user }) => {
           ✓ {success}
         </div>
       )}
+
       <div className="form-group">
-        <label>顯示名稱</label>
+        <label htmlFor="displayName">顯示名稱</label>
         <input
+          id="displayName"
           type="text"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
         />
       </div>
+
       <button
         className="btn-primary"
         style={{ width: "100%", padding: "12px" }}
         onClick={handleSubmit}
         disabled={loading}
       >
-        {loading ? "儲存中..." : "儲存"}
+        {loading ? "儲存中..." : "儲存變更"}
       </button>
     </div>
   );

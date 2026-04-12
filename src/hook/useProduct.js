@@ -18,7 +18,7 @@ export const useCategories = () => {
   return { categories, error };
 };
 
-export const useProducts = (categoryId) => {
+export const useProducts = (params = {}) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -26,8 +26,7 @@ export const useProducts = (categoryId) => {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-
-    getProducts(categoryId)
+    getProducts(params)
       .then((data) => {
         if (!cancelled) {
           setProducts(data);
@@ -36,15 +35,21 @@ export const useProducts = (categoryId) => {
       })
       .catch((err) => {
         if (!cancelled) {
-          setError(err.message);
+          setError(err.response?.data?.message || err.message);
           setLoading(false);
         }
       });
-
     return () => {
       cancelled = true;
     };
-  }, [categoryId]);
+  }, [
+    params.categoryId,
+    params.keyword,
+    params.minPrice,
+    params.maxPrice,
+    params.sortBy,
+    params.sortOrder,
+  ]);
 
   return { products, loading, error };
 };
