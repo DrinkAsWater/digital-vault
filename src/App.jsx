@@ -11,6 +11,7 @@ import Toast from "./components/ui/Toast";
 import PageStatus from "./components/ui/PageStatus";
 import { AuthRoute, AdminRoute } from "./components/ProtectedRoute";
 import AdminLayout from "./components/layout/Adminlayout";
+import ErrorBoundary from "./components/ui/ErrorBoundary";
 
 const HomePage = lazy(() => import("./components/pages/HomePage"));
 const StorePage = lazy(() => import("./components/pages/StorePage"));
@@ -31,7 +32,9 @@ const AdminReviewPage = lazy(
 const AdminCategoryPage = lazy(
   () => import("./components/pages/AdminCategoryPage"),
 );
-const AdminPaymentPage = lazy(() => import("./components/pages/AdminPaymentPage"));
+const AdminPaymentPage = lazy(
+  () => import("./components/pages/AdminPaymentPage"),
+);
 
 const App = () => {
   return (
@@ -48,48 +51,53 @@ const App = () => {
               }}
             >
               <Header />
-              <Suspense fallback={<PageStatus loading={true} />}>
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/store" element={<StorePage />} />
-                  <Route path="/store/:id" element={<DetailPage />} />
-                  <Route path="/auth/callback" element={<AuthCallback />} />
-                  <Route path="/cart" element={<CartPage />} />
-                  <Route
-                    path="/orders"
-                    element={
-                      <AuthRoute>
-                        <OrdersPage />
-                      </AuthRoute>
-                    }
-                  />
-                  <Route
-                    path="/profile"
-                    element={
-                      <AuthRoute>
-                        <ProfilePage />
-                      </AuthRoute>
-                    }
-                  />
+              <ErrorBoundary>
+                <Suspense fallback={<PageStatus loading={true} />}>
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/store" element={<StorePage />} />
+                    <Route path="/store/:id" element={<DetailPage />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
+                    <Route path="/cart" element={<CartPage />} />
+                    <Route
+                      path="/orders"
+                      element={
+                        <AuthRoute>
+                          <OrdersPage />
+                        </AuthRoute>
+                      }
+                    />
+                    <Route
+                      path="/profile"
+                      element={
+                        <AuthRoute>
+                          <ProfilePage />
+                        </AuthRoute>
+                      }
+                    />
 
-                  <Route
-                    path="/admin"
-                    element={
-                      <AdminRoute require="manager">
-                        <AdminLayout />
-                      </AdminRoute>
-                    }
-                  >
-                    <Route index element={<AdminPage />} />
-                    <Route path="products" element={<AdminProductPage />} />
-                    <Route path="orders" element={<AdminOrderPage />} />
-                    <Route path="categories" element={<AdminCategoryPage />} />
-                    <Route path="users" element={<AdminUserPage />} />
-                    <Route path="reviews" element={<AdminReviewPage />} />
-                    <Route path="payments" element={<AdminPaymentPage />} />
-                  </Route>
-                </Routes>
-              </Suspense>
+                    <Route
+                      path="/admin"
+                      element={
+                        <AdminRoute require="manager">
+                          <AdminLayout />
+                        </AdminRoute>
+                      }
+                    >
+                      <Route index element={<AdminPage />} />
+                      <Route path="products" element={<AdminProductPage />} />
+                      <Route path="orders" element={<AdminOrderPage />} />
+                      <Route
+                        path="categories"
+                        element={<AdminCategoryPage />}
+                      />
+                      <Route path="users" element={<AdminUserPage />} />
+                      <Route path="reviews" element={<AdminReviewPage />} />
+                      <Route path="payments" element={<AdminPaymentPage />} />
+                    </Route>
+                  </Routes>
+                </Suspense>
+              </ErrorBoundary>
               <Footer />
               <LoginModal />
               <CheckoutModal />
