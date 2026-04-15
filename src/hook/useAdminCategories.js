@@ -77,5 +77,6 @@ export const useAdminCategories = () => {
     createCategory,
     updateCategory,
     deleteCategory,
+    refetch: fetchCategories,
   };
 };

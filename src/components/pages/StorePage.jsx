@@ -32,7 +32,7 @@ const StorePage = () => {
     sortBy: sortField,
     sortOrder: sortOrder,
     page,
-    pageSize: 12
+    pageSize: 21
   });
 
   return (

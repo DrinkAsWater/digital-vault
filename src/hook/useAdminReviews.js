@@ -6,23 +6,26 @@ export const useAdminReviews = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const { showToast } = useUI();
 
   const fetchReviews = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await adminGetAllReviews();
+      const data = await adminGetAllReviews(page, 20);
       setReviews(data.data);
+      setTotalPages(data.totalPages);
     } catch (err) {
       setError(err.response?.data?.message || "載入評論失敗");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page]);
 
   useEffect(() => {
     fetchReviews();
-  }, [fetchReviews]);
+  }, [fetchReviews, page]);
 
   const deleteReview = useCallback(
     async (id) => {
@@ -38,5 +41,5 @@ export const useAdminReviews = () => {
     [showToast, fetchReviews],
   );
 
-  return { reviews, loading, error, deleteReview };
+  return { reviews, loading, error, deleteReview, page, setPage, totalPages  };
 };

@@ -6,13 +6,16 @@ export const useAdminPayments = () => {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const { showToast } = useUI();
 
   const fetchPayments = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await adminGetAllPayments();
+      const data = await adminGetAllPayments(page, 20);
       setPayments(data.data);
+      setTotalPages(data.totalPages);
     } catch (err) {
       setError(err.response?.data?.message || "載入付款記錄失敗");
     } finally {
@@ -22,7 +25,7 @@ export const useAdminPayments = () => {
 
   useEffect(() => {
     fetchPayments();
-  }, [fetchPayments]);
+  }, [fetchPayments, page]);
 
   const voidPayment = useCallback(async (id, reason) => {
     try {
@@ -34,5 +37,8 @@ export const useAdminPayments = () => {
     }
   }, [showToast, fetchPayments]);
 
-  return { payments, loading, error, voidPayment };
+  return { payments, loading, error, voidPayment, page,
+    setPage,
+    totalPages, // ← 新增
+    refetch: fetchPayments, };
 };

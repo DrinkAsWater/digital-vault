@@ -1,9 +1,5 @@
-import { useState, useEffect } from "react";
-import {
-  getProducts,
-  getCategories,
-  getProductById,
-} from "../utils/ApiFunction";
+import { useState, useEffect, useCallback } from "react";
+import { getProducts, getCategories, getProductById } from "../utils/ApiFunction";
 
 export const useCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -43,9 +39,7 @@ export const useProducts = (params = {}) => {
           setLoading(false);
         }
       });
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [
     params.categoryId,
     params.keyword,
@@ -67,7 +61,6 @@ export const useProductDetail = (id) => {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-
     getProductById(id)
       .then((data) => {
         if (!cancelled) {
@@ -81,10 +74,7 @@ export const useProductDetail = (id) => {
           setLoading(false);
         }
       });
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [id]);
 
   return { product, loading, error };

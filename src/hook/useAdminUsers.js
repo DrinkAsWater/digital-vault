@@ -11,23 +11,26 @@ export const useAdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const { showToast } = useUI();
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await adminGetAllUsers();
+      const data = await adminGetAllUsers(page, 20);
       setUsers(data.data);
+      setTotalPages(data.totalPages);
     } catch (err) {
       setError(err.response?.data?.message || "載入用戶失敗");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page]);
 
   useEffect(() => {
     fetchUsers();
-  }, [fetchUsers]);
+  }, [fetchUsers, page]);
 
   const deactivate = useCallback(async (id) => {
     try {
@@ -59,5 +62,5 @@ export const useAdminUsers = () => {
     }
   }, [showToast, fetchUsers]);
 
-  return { users, loading, error, deactivate, activate, updateRole };
+  return { users, loading, error, deactivate, activate, updateRole, page, setPage, totalPages  };
 };
