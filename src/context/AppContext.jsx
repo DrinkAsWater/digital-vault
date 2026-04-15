@@ -5,7 +5,7 @@ import {
   getToken,
   getUser,
 } from "../utils/tokenHelper";
-import { apiLogout, createOrder, refreshToken } from "../utils/ApiFuction";
+import { apiLogout, createOrder, refreshToken } from "../utils/ApiFunction";
 
 const AppContext = createContext(null);
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { saveUser, clearAuth } from "../utils/tokenHelper";
-import { login, register, apiLogout } from "../utils/ApiFuction";
+import { login, register, apiLogout } from "../utils/ApiFunction";
 
 const useAuthForm = () => {
   const [loading, setLoading] = useState(false);

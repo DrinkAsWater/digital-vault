@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { checkout } from "../utils/ApiFuction";
+import { checkout } from "../utils/ApiFunction";
 import { useCart } from "../context/CartContext";
 import { useUI } from "../context/UIContext";
 

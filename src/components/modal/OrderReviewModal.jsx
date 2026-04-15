@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Stars } from "../ui/Stars";
-import { createReview } from "../../utils/ApiFuction";
+import { createReview } from "../../utils/ApiFunction";
 
 const OrderReviewModal = ({ order, onClose, onSuccess }) => {
   const particleRefs = useRef({});

@@ -4,24 +4,35 @@ import { useCategories, useProducts } from "../../hook/useProduct";
 import ProductGrid from "../product/ProductGrid";
 import SkeletonGrid from "../ui/SkeletonGrid";
 import ProductSearch from "../admin/product/ProductSearch";
+import Pagination from "../ui/Pagination";
 
 const StorePage = () => {
   const { activeCart, setActiveCart } = useCart();
   const { categories } = useCategories();
   const [keyword, setKeyword] = useState("");
   const [sortBy, setSortBy] = useState("");
+  const [page, setPage] = useState(1);
 
   const [sortField, sortOrder] = sortBy ? sortBy.split("_") : [null, null];
 
   const handleSearch = useCallback((value) => {
     setKeyword(value);
+    setPage(1);  // 搜尋時重置頁碼
   }, []);
 
-  const { products, loading, error } = useProducts({
+  const handleCategoryChange = (id) => {
+    setActiveCart(id);
+    setPage(1);  // 切換分類時重置頁碼
+  };
+
+
+  const { products, totalPages, loading, error } = useProducts({
     categoryId: activeCart,
     keyword: keyword || null,
     sortBy: sortField,
     sortOrder: sortOrder,
+    page,
+    pageSize: 12
   });
 
   return (
@@ -34,7 +45,7 @@ const StorePage = () => {
           <button
             key={c.id ?? "all"}
             className={`cat-btn ${c.id === activeCart ? "active" : ""}`}
-            onClick={() => setActiveCart(c.id)}
+            onClick={() => handleCategoryChange(c.id)}
           >
             {c.name}
           </button>
@@ -43,7 +54,7 @@ const StorePage = () => {
       <ProductSearch
         onSearch={handleSearch}
         sortBy={sortBy}
-        onSortChange={setSortBy}
+        onSortChange={(val) => { setSortBy(val); setPage(1); }}
       />
       {error ? (
         <div
@@ -56,9 +67,16 @@ const StorePage = () => {
           載入失敗，請重新整理
         </div>
       ) : loading ? (
-        <SkeletonGrid count={8} />
+        <SkeletonGrid count={12} />
       ) : (
+        <>
         <ProductGrid products={products} />
+        <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+        </>
       )}
     </>
   );

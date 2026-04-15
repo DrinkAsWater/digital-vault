@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getPaymentByOrder } from "../../utils/ApiFuction";
+import { getPaymentByOrder } from "../../utils/ApiFunction";
 
 const CVSResult = ({ result, onClose, onSuccess }) => {
   const [copied, setCopied] = useState(false);

@@ -43,6 +43,8 @@ export const getProducts = async (params = {}) => {
   if (params.maxPrice) query.append("maxPrice", params.maxPrice);
   if (params.sortBy) query.append("sortBy", params.sortBy);
   if (params.sortOrder) query.append("sortOrder", params.sortOrder);
+  if (params.page) query.append("page", params.page);
+  if (params.pageSize) query.append("pageSize", params.pageSize);
   const res = await api.get(`/product?${query.toString()}`);
   return res.data;
 };
@@ -58,8 +60,9 @@ export const createOrder = async (productIds) => {
   return res.data;
 };
 
-export const getMyOrders = async () => {
-  const res = await api.get("/order");
+// 訂單（加入分頁）
+export const getMyOrders = async (page = 1, pageSize = 10) => {
+  const res = await api.get(`/order?page=${page}&pageSize=${pageSize}`);
   return res.data;
 };
 
@@ -219,8 +222,8 @@ export const adminDeleteCategory = async (id) => {
 };
 
 // ── Admin Order ──
-export const adminGetAllOrders = async () => {
-  const res = await api.get("/admin/order");
+export const adminGetAllOrders = async (page = 1, pageSize = 20) => {
+  const res = await api.get(`/admin/order?page=${page}&pageSize=${pageSize}`);
   return res.data;
 };
 
@@ -235,8 +238,8 @@ export const adminUpdateOrderStatus = async (id, status) => {
 };
 
 // ── Admin User ──
-export const adminGetAllUsers = async () => {
-  const res = await api.get("/admin/user");
+export const adminGetAllUsers = async (page = 1, pageSize = 20) => {
+  const res = await api.get(`/admin/user?page=${page}&pageSize=${pageSize}`);
   return res.data;
 };
 
@@ -261,8 +264,8 @@ export const adminUpdateUserRole = async (id, role) => {
 };
 
 // ── Admin Payment ──
-export const adminGetAllPayments = async () => {
-  const res = await api.get("/admin/payment");
+export const adminGetAllPayments = async (page = 1, pageSize = 20) => {
+  const res = await api.get(`/admin/payment?page=${page}&pageSize=${pageSize}`);
   return res.data;
 };
 
@@ -271,8 +274,8 @@ export const adminVoidPayment = async (id, reason) => {
   return res.data;
 };
 // ── Admin Review ──
-export const adminGetAllReviews = async () => {
-  const res = await api.get("/admin/review");
+export const adminGetAllReviews = async (page = 1, pageSize = 20) => {
+  const res = await api.get(`/admin/review?page=${page}&pageSize=${pageSize}`);
   return res.data;
 };
 
@@ -285,3 +288,5 @@ export const adminGetStats = async () => {
   const res = await api.get("/admin/stats");
   return res.data;
 };
+
+

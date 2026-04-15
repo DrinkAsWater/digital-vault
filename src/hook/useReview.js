@@ -6,7 +6,7 @@ import {
     createReview,
     updateReview,
     deleteReview,
-} from "../utils/ApiFuction";
+} from "../utils/ApiFunction";
 import { clearAuth, getUser } from "../utils/tokenHelper";
 
 const currentUser = getUser();

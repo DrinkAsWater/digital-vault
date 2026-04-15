@@ -7,9 +7,10 @@ import PageStatus from "../ui/PageStatus";
 import { useMyOrders, useCancelOrder, useDownload } from "../../hook/useOrders";
 import OrderReviewModal from "../modal/OrderReviewModal";
 import DownloadModal from "../modal/DownloadModal";
-import { getPaymentByOrder } from "../../utils/ApiFuction";
+import { getPaymentByOrder } from "../../utils/ApiFunction";
 import CVSResult from "../payment/CVSResult";
 import SkeletonOrderCard from "../ui/SkeletonOrderCard";
+import Pagination from "../ui/Pagination";
 
 const STATUS_CLASS = {
   0: "status-unpaid",
@@ -29,7 +30,7 @@ const OrdersPage = () => {
   const navigate = useNavigate();
   const { isGuest } = useAuth();
   const { openLogin, showToast } = useUI();
-  const { orders, loading, error, refetch } = useMyOrders();
+  const { orders, totalPages, page, setPage, loading, error, refetch } = useMyOrders();
   const { cancel, loading: cancelling } = useCancelOrder();
   const { downloads, loading: downloading, fetchDownload } = useDownload();
   const [reviewingOrder, setReviewingOrder] = useState(null);
@@ -181,6 +182,12 @@ const OrdersPage = () => {
           </div>
         </div>
       ))}
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
 
       {/* 下載 Modal */}
       {showDownload && downloads && (

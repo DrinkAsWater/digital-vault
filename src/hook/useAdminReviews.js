@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { adminGetAllReviews, adminDeleteReview } from "../utils/ApiFuction";
+import { adminGetAllReviews, adminDeleteReview } from "../utils/ApiFunction";
 import { useUI } from "../context/UIContext";
 
 export const useAdminReviews = () => {
@@ -12,7 +12,7 @@ export const useAdminReviews = () => {
     setLoading(true);
     try {
       const data = await adminGetAllReviews();
-      setReviews(data);
+      setReviews(data.data);
     } catch (err) {
       setError(err.response?.data?.message || "載入評論失敗");
     } finally {

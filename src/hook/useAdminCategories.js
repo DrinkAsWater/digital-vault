@@ -4,7 +4,7 @@ import {
   adminCreateCategory,
   adminUpdateCategory,
   adminDeleteCategory,
-} from "../utils/ApiFuction";
+} from "../utils/ApiFunction";
 import { useUI } from "../context/UIContext";
 
 export const useAdminCategories = () => {

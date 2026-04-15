@@ -5,7 +5,7 @@ import {
   adminUnpublishProduct,
   adminUpdateProduct,
   adminPublishProduct, // ← 新增
-} from "../utils/ApiFuction";
+} from "../utils/ApiFunction";
 import { useUI } from "../context/UIContext";
 
 export const useAdminProducts = () => {

@@ -377,7 +377,7 @@ src/
 │   ├── useAdminReviews.js    後台評論管理
 │   └── useAdminStats.js      後台統計數據
 ├── utils/
-│   ├── ApiFuction.js     所有 API 呼叫
+│   ├── ApiFunction.js     所有 API 呼叫
 │   ├── axiosInstance.js  Axios 實例 + Token 自動刷新 interceptor
 │   ├── authEvents.js     Token 刷新事件系統
 │   ├── tokenHelper.js    USER_KEY，user 資訊存取

@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { uploadAvatar } from "../../utils/ApiFuction";
+import { uploadAvatar } from "../../utils/ApiFunction";
 import { getAvatarUrl } from "../../utils/avatarHelper";
 import { useUI } from "../../context/UIContext";
 

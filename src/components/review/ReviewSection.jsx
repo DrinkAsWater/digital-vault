@@ -1,5 +1,3 @@
-// components/review/ReviewSection.jsx
-import { useState } from "react";
 import { useProductReviews, useReviewActions } from "../../hook/useReview";
 import ReviewCard from "./ReviewCard";
 import ReviewForm from "./ReviewForm";
@@ -12,10 +10,6 @@ const ReviewSection = ({ productId, currentUserId, userOrderId }) => {
   // 判斷目前使用者是否已評論過
   const myReview = reviews.find((r) => r.userId === currentUserId);
   const canReview = currentUserId && userOrderId && !myReview;
-  console.log("currentUserId:", currentUserId);
-  console.log("userOrderId:", userOrderId);
-  console.log("myReview:", myReview);
-  console.log("canReview:", canReview);
 
   // 計算平均評分
   const avgRating =

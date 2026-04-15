@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { adminGetAllPayments, adminVoidPayment } from "../utils/ApiFuction";
+import { adminGetAllPayments, adminVoidPayment } from "../utils/ApiFunction";
 import { useUI } from "../context/UIContext";
 
 export const useAdminPayments = () => {
@@ -12,7 +12,7 @@ export const useAdminPayments = () => {
     setLoading(true);
     try {
       const data = await adminGetAllPayments();
-      setPayments(data);
+      setPayments(data.data);
     } catch (err) {
       setError(err.response?.data?.message || "載入付款記錄失敗");
     } finally {

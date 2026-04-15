@@ -4,7 +4,7 @@ import {
   adminDeactivateUser,
   adminActivateUser,
   adminUpdateUserRole,
-} from "../utils/ApiFuction";
+} from "../utils/ApiFunction";
 import { useUI } from "../context/UIContext";
 
 export const useAdminUsers = () => {
@@ -17,7 +17,7 @@ export const useAdminUsers = () => {
     setLoading(true);
     try {
       const data = await adminGetAllUsers();
-      setUsers(data);
+      setUsers(data.data);
     } catch (err) {
       setError(err.response?.data?.message || "載入用戶失敗");
     } finally {

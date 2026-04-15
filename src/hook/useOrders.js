@@ -1,46 +1,81 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   createOrder,
   getMyOrders,
   getOrderById,
   cancelOrder,
   getDownload,
-} from "../utils/ApiFuction";
+} from "../utils/ApiFunction";
 
 // 取得我的訂單列表
 export const useMyOrders = () => {
   const [orders, setOrders] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchOrders = () => {
+  const fetchOrders = useCallback((p) => {
+  let cancelled = false;
+  setLoading(true);
+
+  getMyOrders(p, 10)
+    .then((data) => {
+      if (!cancelled) {
+        setOrders(data.data);
+        setTotal(data.total);
+        setTotalPages(data.totalPages);
+        setLoading(false);
+      }
+    })
+    .catch((err) => {
+      if (!cancelled) {
+        setError(err.response?.data?.message || err.message);
+        setLoading(false);
+      }
+    });
+
+  return () => { cancelled = true; };
+}, []);
+
+  useEffect(() => {
+    const cleanup = fetchOrders(page);
+    return cleanup;
+  }, [page, fetchOrders]);
+
+  useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    getMyOrders()
-      .then((data) => {
+
+    const run = async () => {
+      setLoading(true);
+      try {
+        const data = await getMyOrders(page, 10);
         if (!cancelled) {
-          setOrders(data);
-          setLoading(false);
+          setOrders(data.data);
+          setTotal(data.total);
+          setTotalPages(data.totalPages);
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         if (!cancelled) {
           setError(err.response?.data?.message || err.message);
+        }
+      } finally {
+        if (!cancelled) {
           setLoading(false);
         }
-      });
+      }
+    };
+
+    run();
+
     return () => {
       cancelled = true;
     };
-  };
+  }, [page]);
 
-  useEffect(() => {
-    return fetchOrders();
-  }, []);
-
-  return { orders, loading, error, refetch: fetchOrders };
+  return { orders, total, totalPages, page, setPage, loading, error, refetch: fetchOrders };
 };
-
 // 建立訂單
 export const useCreateOrder = () => {
   const [loading, setLoading] = useState(false);

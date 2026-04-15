@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import useAuthForm from "../../hook/useAuthForm";
 import { useUI } from "../../context/UIContext";
-import { googleLogin } from "../../utils/ApiFuction";
+import { googleLogin } from "../../utils/ApiFunction";
 
 const LoginModal = () => {
   const { loginAs } = useAuth();

@@ -3,7 +3,7 @@ import {
   getProducts,
   getCategories,
   getProductById,
-} from "../utils/ApiFuction";
+} from "../utils/ApiFunction";
 
 export const useCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -20,6 +20,8 @@ export const useCategories = () => {
 
 export const useProducts = (params = {}) => {
   const [products, setProducts] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -29,7 +31,9 @@ export const useProducts = (params = {}) => {
     getProducts(params)
       .then((data) => {
         if (!cancelled) {
-          setProducts(data);
+          setProducts(data.data);
+          setTotal(data.total);
+          setTotalPages(data.totalPages);
           setLoading(false);
         }
       })
@@ -49,9 +53,10 @@ export const useProducts = (params = {}) => {
     params.maxPrice,
     params.sortBy,
     params.sortOrder,
+    params.page,
   ]);
 
-  return { products, loading, error };
+  return { products, total, totalPages, loading, error };
 };
 
 export const useProductDetail = (id) => {

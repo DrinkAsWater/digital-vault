@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { adminGetStats } from "../utils/ApiFuction";
+import { adminGetStats } from "../utils/ApiFunction";
 
 export const useAdminStats = () => {
   const [stats, setStats] = useState(null);

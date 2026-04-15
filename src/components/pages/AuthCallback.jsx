@@ -19,6 +19,7 @@ const AuthCallback = () => {
     }
 
     const user = {
+      id: params.get("id"),
       email,
       displayName,
       role,

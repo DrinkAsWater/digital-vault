@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getPurchases, updateDisplayName, updatePassword } from "../utils/ApiFuction";
+import { getPurchases, updateDisplayName, updatePassword } from "../utils/ApiFunction";
 
 // 取得已購商品清單
 export const usePurchases = () => {

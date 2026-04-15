@@ -6,7 +6,7 @@ import {
   useEffect,
 } from "react";
 import { clearAuth, getUser, saveUser } from "../utils/tokenHelper";
-import { apiLogout } from "../utils/ApiFuction";
+import { apiLogout } from "../utils/ApiFunction";
 import { useUI } from "./UIContext";
 import { onUserRefreshed } from "../utils/authEvents";
 
