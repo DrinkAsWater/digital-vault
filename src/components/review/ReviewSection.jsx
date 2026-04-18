@@ -1,3 +1,4 @@
+import { useOptimistic } from "react";
 import { useProductReviews, useReviewActions } from "../../hook/useReview";
 import ReviewCard from "./ReviewCard";
 import ReviewForm from "./ReviewForm";
@@ -7,17 +8,46 @@ const ReviewSection = ({ productId, currentUserId, userOrderId }) => {
   const { submitting, actionError, handleCreate, handleUpdate, handleDelete } =
     useReviewActions(refetch);
 
-  // 判斷目前使用者是否已評論過
-  const myReview = reviews.find((r) => r.userId === currentUserId);
+  // 樂觀更新：立即反映刪除 / 編輯
+  const [optimisticReviews, applyOptimistic] = useOptimistic(
+    reviews,
+    (state, action) => {
+      if (action.type === "delete") {
+        return state.filter((r) => r.id !== action.id);
+      }
+      if (action.type === "update") {
+        return state.map((r) =>
+          r.id === action.id
+            ? { ...r, rating: action.rating, comment: action.comment }
+            : r,
+        );
+      }
+      return state;
+    },
+  );
+
+  const myReview = optimisticReviews.find((r) => r.userId === currentUserId);
   const canReview = currentUserId && userOrderId && !myReview;
 
-  // 計算平均評分
   const avgRating =
-    reviews.length > 0
+    optimisticReviews.length > 0
       ? (
-          reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+          optimisticReviews.reduce((sum, r) => sum + r.rating, 0) /
+          optimisticReviews.length
         ).toFixed(1)
       : null;
+
+  // 樂觀刪除
+  const onDelete = async (id) => {
+    applyOptimistic({ type: "delete", id });
+    await handleDelete(id);
+  };
+
+  // 樂觀編輯
+  const onUpdate = async (id, rating, comment) => {
+    applyOptimistic({ type: "update", id, rating, comment });
+    return await handleUpdate(id, rating, comment);
+  };
 
   if (loading) return <div className="empty-state">載入評論中...</div>;
   if (error) return <div className="empty-state">{error}</div>;
@@ -26,7 +56,9 @@ const ReviewSection = ({ productId, currentUserId, userOrderId }) => {
     <div className="reviews-section">
       <div className="section-title" style={{ marginBottom: "20px" }}>
         用戶評論{" "}
-        <span style={{ color: "var(--cyan)" }}>({reviews.length})</span>
+        <span style={{ color: "var(--cyan)" }}>
+          ({optimisticReviews.length})
+        </span>
         {avgRating && (
           <span
             style={{
@@ -40,7 +72,6 @@ const ReviewSection = ({ productId, currentUserId, userOrderId }) => {
         )}
       </div>
 
-      {/* 新增評論表單 */}
       {canReview && (
         <div className="review-form-wrapper">
           <div className="review-form-title">撰寫評論</div>
@@ -56,21 +87,20 @@ const ReviewSection = ({ productId, currentUserId, userOrderId }) => {
         </div>
       )}
 
-      {/* 評論列表 */}
-      {reviews.length === 0 ? (
+      {optimisticReviews.length === 0 ? (
         <div className="empty-state" style={{ padding: "40px" }}>
           <div className="empty-icon">💬</div>
           <h3>尚無評論</h3>
           <p>購買後即可留下評論</p>
         </div>
       ) : (
-        reviews.map((r) => (
+        optimisticReviews.map((r) => (
           <ReviewCard
             key={r.id}
             review={r}
             currentUserId={currentUserId}
-            onUpdate={handleUpdate}
-            onDelete={handleDelete}
+            onUpdate={onUpdate}
+            onDelete={onDelete}
             submitting={submitting}
           />
         ))

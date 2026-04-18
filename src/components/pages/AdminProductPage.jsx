@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useOptimistic } from "react";
 import PageStatus from "../ui/PageStatus";
 import EmptyState from "../ui/EmptyState";
 import ProductTable from "../../components/admin/product/ProductTable";
@@ -15,15 +15,33 @@ const AdminProductPage = () => {
     unpublishProduct,
     publishProduct,
   } = useAdminProducts();
+
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [keyword, setKeyword] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
+  // 樂觀更新：立即切換上下架狀態
+  const [optimisticProducts, applyOptimistic] = useOptimistic(
+    products,
+    (state, { id, isPublished }) =>
+      state.map((p) => (p.id === id ? { ...p, isPublished } : p)),
+  );
+
+  const handleOptimisticPublish = async (id) => {
+    applyOptimistic({ id, isPublished: true });
+    await publishProduct(id);
+  };
+
+  const handleOptimisticUnpublish = async (id) => {
+    applyOptimistic({ id, isPublished: false });
+    await unpublishProduct(id);
+  };
+
   // 前端篩選
   const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
+    return optimisticProducts.filter((p) => {
       const matchKeyword =
         !keyword ||
         p.name.toLowerCase().includes(keyword.toLowerCase()) ||
@@ -36,7 +54,7 @@ const AdminProductPage = () => {
             : !p.isPublished;
       return matchKeyword && matchStatus;
     });
-  }, [products, keyword, filterStatus]);
+  }, [optimisticProducts, keyword, filterStatus]);
 
   if (loading || error) return <PageStatus loading={loading} error={error} />;
 
@@ -159,8 +177,8 @@ const AdminProductPage = () => {
         <ProductTable
           products={filteredProducts}
           onEdit={handleEdit}
-          onUnpublish={unpublishProduct}
-          onPublish={publishProduct}
+          onUnpublish={handleOptimisticUnpublish}
+          onPublish={handleOptimisticPublish}
         />
       )}
 

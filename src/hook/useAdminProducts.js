@@ -57,9 +57,13 @@ export const useAdminProducts = () => {
     try {
       await adminUnpublishProduct(id);
       showToast("✅", "商品已下架");
-      fetchProducts();
+      // 直接更新 state，不重新 fetch
+      setProducts((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, isPublished: false } : p)),
+      );
     } catch (err) {
       showToast("❌", err.response?.data?.message || "下架失敗");
+      fetchProducts();
     }
   };
 
@@ -67,9 +71,12 @@ export const useAdminProducts = () => {
     try {
       await adminPublishProduct(id);
       showToast("✅", "商品已上架");
-      fetchProducts();
+      setProducts((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, isPublished: true } : p)),
+      );
     } catch (err) {
       showToast("❌", err.response?.data?.message || "上架失敗");
+      fetchProducts();
     }
   };
 
@@ -80,7 +87,7 @@ export const useAdminProducts = () => {
     createProduct,
     updateProduct,
     unpublishProduct,
-    publishProduct, 
+    publishProduct,
     refetch: fetchProducts,
   };
 };

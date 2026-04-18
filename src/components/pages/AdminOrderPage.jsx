@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import PageStatus from "../ui/PageStatus";
 import EmptyState from "../ui/EmptyState";
 import { useAdminOrders } from "../../hook/useAdminOrders";
@@ -25,6 +25,21 @@ const AdminOrderPage = () => {
   const { orders, loading, error, updateStatus, page, totalPages, setPage } =
     useAdminOrders();
   const [updatingId, setUpdatingId] = useState(null);
+  const [keyword, setKeyword] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+
+  const filteredOrders = useMemo(() => {
+    return orders.filter((o) => {
+      const matchKeyword =
+        !keyword ||
+        o.orderNo.toLowerCase().includes(keyword.toLowerCase()) ||
+        o.userDisplayName?.toLowerCase().includes(keyword.toLowerCase()) ||
+        o.userEmail?.toLowerCase().includes(keyword.toLowerCase());
+      const matchStatus =
+        filterStatus === "all" || o.status === parseInt(filterStatus);
+      return matchKeyword && matchStatus;
+    });
+  }, [orders, keyword, filterStatus]);
 
   if (loading || error) return <PageStatus loading={loading} error={error} />;
 
@@ -41,112 +56,191 @@ const AdminOrderPage = () => {
           <div className="admin-page-title">
             訂單管理 <span>Orders</span>
           </div>
-          <div className="admin-page-sub">共 {orders.length} 筆訂單</div>
+          <div className="admin-page-sub">
+            共 {filteredOrders.length} 筆訂單
+          </div>
         </div>
       </div>
 
-      {orders.length === 0 ? (
-        <EmptyState icon="≡" title="尚無訂單" />
+      {/* 搜尋 + 篩選列 */}
+      <div
+        style={{
+          display: "flex",
+          gap: "12px",
+          marginBottom: "16px",
+          flexWrap: "wrap",
+        }}
+      >
+        <div style={{ position: "relative", flex: 1, minWidth: "200px" }}>
+          <input
+            type="text"
+            placeholder="搜尋訂單編號、用戶名稱或 Email..."
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "9px 14px 9px 36px",
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "9px",
+              color: "var(--text)",
+              fontSize: "0.88rem",
+              outline: "none",
+              boxSizing: "border-box",
+            }}
+          />
+          <span
+            style={{
+              position: "absolute",
+              left: "12px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "var(--muted)",
+              fontSize: "0.85rem",
+              pointerEvents: "none",
+            }}
+          >
+            🔍
+          </span>
+        </div>
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          style={{
+            padding: "9px 14px",
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "9px",
+            color: "var(--text)",
+            fontSize: "0.88rem",
+            outline: "none",
+            cursor: "pointer",
+          }}
+        >
+          <option value="all">全部狀態</option>
+          {STATUS_OPTIONS.map((s) => (
+            <option key={s.value} value={s.value}>
+              {s.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {filteredOrders.length === 0 ? (
+        <EmptyState
+          icon="≡"
+          title={
+            keyword || filterStatus !== "all" ? "找不到符合的訂單" : "尚無訂單"
+          }
+        />
       ) : (
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>訂單編號</th>
-              <th>用戶</th>
-              <th>商品</th>
-              <th>金額</th>
-              <th>狀態</th>
-              <th>建立時間</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order) => (
-              <tr key={order.id}>
-                <td>
-                  <span
-                    style={{
-                      fontFamily: "'Syne', sans-serif",
-                      fontWeight: 700,
-                      fontSize: "0.82rem",
-                    }}
-                  >
-                    {order.orderNo}
-                  </span>
-                </td>
-                <td>
-                  <div style={{ fontSize: "0.85rem" }}>
-                    {order.userDisplayName}
-                  </div>
-                  <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>
-                    {order.userEmail}
-                  </div>
-                </td>
-                <td>
-                  <div
-                    style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}
-                  >
-                    {order.items?.map((item) => (
-                      <span
-                        key={item.id}
-                        style={{
-                          background: "var(--surface)",
-                          border: "1px solid var(--border)",
-                          borderRadius: "6px",
-                          padding: "2px 8px",
-                          fontSize: "0.75rem",
-                          color: "var(--muted)",
-                        }}
-                      >
-                        {item.productName}
-                      </span>
-                    ))}
-                  </div>
-                </td>
-                <td
-                  style={{
-                    fontFamily: "'Syne', sans-serif",
-                    fontWeight: 700,
-                    color: "var(--cyan)",
-                  }}
-                >
-                  ${order.totalAmount}
-                </td>
-                <td>
-                  <span className={`badge ${STATUS_BADGE[order.status]}`}>
-                    {getStatusLabel(order.status)}
-                  </span>
-                </td>
-                <td style={{ color: "var(--muted)", fontSize: "0.78rem" }}>
-                  {new Date(order.createdAt).toLocaleDateString("zh-TW")}
-                </td>
-                <td>
-                  <select
-                    className="admin-form-select"
-                    style={{
-                      padding: "6px 10px",
-                      fontSize: "0.78rem",
-                      width: "auto",
-                    }}
-                    value={order.status}
-                    disabled={updatingId === order.id}
-                    onChange={(e) =>
-                      handleStatusChange(order.id, e.target.value)
-                    }
-                  >
-                    {STATUS_OPTIONS.map((s) => (
-                      <option key={s.value} value={s.value}>
-                        {s.label}
-                      </option>
-                    ))}
-                  </select>
-                </td>
+        <>
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>訂單編號</th>
+                <th>用戶</th>
+                <th>商品</th>
+                <th style={{ textAlign: "right" }}>金額</th>
+                <th>狀態</th>
+                <th>建立時間</th>
+                <th style={{ textAlign: "center" }}>操作</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredOrders.map((order) => (
+                <tr key={order.id}>
+                  <td>
+                    <span
+                      style={{
+                        fontFamily: "'Syne', sans-serif",
+                        fontWeight: 700,
+                        fontSize: "0.82rem",
+                      }}
+                    >
+                      {order.orderNo}
+                    </span>
+                  </td>
+                  <td>
+                    <div style={{ fontSize: "0.85rem" }}>
+                      {order.userDisplayName}
+                    </div>
+                    <div style={{ fontSize: "0.75rem", color: "var(--muted)" }}>
+                      {order.userEmail}
+                    </div>
+                  </td>
+                  <td>
+                    <div
+                      style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}
+                    >
+                      {order.items?.map((item) => (
+                        <span
+                          key={item.id}
+                          style={{
+                            background: "var(--surface)",
+                            border: "1px solid var(--border)",
+                            borderRadius: "6px",
+                            padding: "2px 8px",
+                            fontSize: "0.75rem",
+                            color: "var(--muted)",
+                          }}
+                        >
+                          {item.productName}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td style={{ textAlign: "right" }}>
+                    <span
+                      style={{
+                        fontFamily: "'Syne', sans-serif",
+                        fontWeight: 700,
+                        color: "var(--cyan)",
+                      }}
+                    >
+                      ${order.totalAmount}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`badge ${STATUS_BADGE[order.status]}`}>
+                      {getStatusLabel(order.status)}
+                    </span>
+                  </td>
+                  <td style={{ color: "var(--muted)", fontSize: "0.78rem" }}>
+                    {new Date(order.createdAt).toLocaleDateString("zh-TW")}
+                  </td>
+                  <td style={{ textAlign: "center" }}>
+                    <select
+                      className="admin-form-select"
+                      style={{
+                        padding: "6px 10px",
+                        fontSize: "0.78rem",
+                        width: "auto",
+                      }}
+                      value={order.status}
+                      disabled={updatingId === order.id}
+                      onChange={(e) =>
+                        handleStatusChange(order.id, e.target.value)
+                      }
+                    >
+                      {STATUS_OPTIONS.map((s) => (
+                        <option key={s.value} value={s.value}>
+                          {s.label}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+        </>
       )}
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 };
