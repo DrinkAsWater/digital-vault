@@ -1,0 +1,36 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "fonted/digital-vault/**"
+      - ".github/workflows/frontend-ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "fonted/digital-vault/**"
+
+jobs:
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: "npm"
+          cache-dependency-path: fonted/digital-vault/package-lock.json
+
+      - name: Install dependencies
+        working-directory: fonted/digital-vault
+        run: npm ci
+
+      - name: Build
+        working-directory: fonted/digital-vault
+        run: npm run build
