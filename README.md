@@ -1,5 +1,5 @@
 # Digital Vault 🛍️
-
+![CI](https://github.com/DrinkAsWater/digital-vault/workflows/Frontend%20CI/badge.svg)
 > 數位商品電商平台 — 即購即用，無需等待配送
 
 ---
