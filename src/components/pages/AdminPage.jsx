@@ -2,6 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useAdminStats } from "../../hook/useAdminStats";
 import PageStatus from "../ui/PageStatus";
+import AdminNotification from "../admin/AdminNotification";
+import { useAdminNotification } from "../../hook/useAdminNotification";
 
 const MENU_ITEMS = [
   {
@@ -76,6 +78,7 @@ const AdminPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { stats, loading } = useAdminStats();
+   const { notifications, connected, clearNotifications } = useAdminNotification();
   const accessible = MENU_ITEMS.filter((m) => canAccess(user, m.require));
 
   return (
@@ -97,6 +100,12 @@ const AdminPage = () => {
           + 新增商品
         </button>
       </div>
+      {/* 即時通知 */}
+      <AdminNotification
+        notifications={notifications}
+        connected={connected}
+        onClear={clearNotifications}
+      />
 
       {/* 統計卡 */}
       <div className="admin-stat-grid">
