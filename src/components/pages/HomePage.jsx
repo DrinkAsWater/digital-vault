@@ -5,6 +5,9 @@ import ProductCard from "../product/ProductCard";
 import PageStatus from "../ui/PageStatus";
 import { useProducts } from "../../hook/useProduct";
 import SkeletonGrid from "../ui/SkeletonGrid";
+import MagneticButton from '../ui/MagneticButton';
+import NavLoginPill from '../ui/NavLoginPill';
+import '../ui/audio.js';
 
 const STATS = [
   { num: "200+", label: "數位商品" },
@@ -36,16 +39,13 @@ const HomePage = () => {
             <br />
             即購即用，無需等待配送
           </p>
-          <div className="hero-btns">
-            <button className="btn-primary" onClick={() => navigate("/store")}>
-              瀏覽商店
-            </button>
+          <section className="hero-btns">
+             {/* <button className="primary" onClick={() => navigate("/store")}>瀏覽商店</button> */}
+             <MagneticButton label="瀏覽商店" primary onActivate={() => navigate("/store")} />
             {isGuest() && (
-              <button className="btn-outline" onClick={openLogin}>
-                登入帳號
-              </button>
+             <MagneticButton label="登入帳號" onActivate={openLogin}  onClick={openLogin} />
             )}
-          </div>
+          </section>
         </div>
       </section>
 
